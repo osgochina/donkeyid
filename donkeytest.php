@@ -1,13 +1,13 @@
 <?php
 
 
-$donkeyid = new DonkeyId();
-for($i=0;$i<20;$i++){
-    $donkeyid->set_node_id($i);
-    echo $id = $donkeyid->get_next_id(),"\n";
-    echo $time = $donkeyid->get_time_by_donkeyid($id),"\n";
-    echo date("Y-m-d H:i:s",$time/1000),"\n";
-    echo $donkeyid->get_node_by_donkeyid($id),"\n";
-}
-
+    $donkey = new DonkeyId();
+    $donkey->set_node_id(11);
+    $id = $donkey->get_next_id();
+    $time = $donkey->get_time_by_donkeyid($id);
+    $node = $donkey->get_node_by_donkeyid($id);
+    
+    echo "donkeyid=".$id."\n";
+    echo "time=".date("Y-m-d H:i:s",$time/1000)."\n";
+    echo "node=".$node."\n";
 
