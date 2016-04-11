@@ -4,12 +4,12 @@
 
 #define TOTALBITS            64L
 #define CUSTOMBITS       (TOTALBITS-4L)
-#define  TIMEBITS             (CUSTOMBITS-42L)
-#define  NODEIDBITS       (TIMEBITS-8L)
-#define  INDEXMASK         (-1L^(-1L << 10L))
+#define  TIMEBITS             (CUSTOMBITS-43L)
+#define  NODEIDBITS       (TIMEBITS-9L)
+#define  INDEXMASK         (-1L^(-1L << 8L))
 
 #define  GETTIMEBITS(tn)             tn<<TIMEBITS
-#define  GETNODEBITS(nid)        ( (nid&(-1^(-1<<8)))<<NODEIDBITS)
+#define  GETNODEBITS(nid)        ( (nid&(-1L^(-1L<<9L)))<<NODEIDBITS)
 #define  GETINDEXBITS(num)     num
 #define  GETCUSTOMBITS(id)      id*10
 
