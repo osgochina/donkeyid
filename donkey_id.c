@@ -69,7 +69,7 @@ uint64_t get_donkey_id(){
     uint64_t donkeyid = 0;
     uint64_t time_now = get_curr_ms();
     if(time_now < d_info.last_time){
-    	time_now = d_info.last_time;
+    	d_info.last_time = time_now;
     }
     if(time_now == d_info.last_time){
         d_info.atomic_num = atomic_incr(d_info.atomic_num)  &  INDEXMASK;
