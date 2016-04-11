@@ -11,5 +11,4 @@ void set_node_id(int);
 //获取id
 uint64_t get_donkey_id();
 
-
 #endif // DONKEYID_H_INCLUDED

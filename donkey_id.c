@@ -3,8 +3,8 @@
 #include "donkey_id.h"
 
 #define TOTALBITS            64L
-#define CUSTOMBITS       (TOTALBITS-4L)
-#define  TIMEBITS             (CUSTOMBITS-43L)
+#define CUSTOMBITS       (TOTALBITS-5L)
+#define  TIMEBITS             (CUSTOMBITS-42L)
 #define  NODEIDBITS       (TIMEBITS-9L)
 #define  INDEXMASK         (-1L^(-1L << 8L))
 
@@ -69,7 +69,7 @@ uint64_t get_donkey_id(){
     uint64_t donkeyid = 0;
     uint64_t time_now = get_curr_ms();
     if(time_now < d_info.last_time){
-        return 0;
+    	time_now = d_info.last_time;
     }
     if(time_now == d_info.last_time){
         d_info.atomic_num = atomic_incr(d_info.atomic_num)  &  INDEXMASK;
