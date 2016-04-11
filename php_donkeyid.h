@@ -25,6 +25,7 @@ extern zend_module_entry donkeyid_module_entry;
 #define phpext_donkeyid_ptr &donkeyid_module_entry
 
 #define PHP_DONKEYID_VERSION "0.1.0" /* Replace with version number for your extension */
+#define PHP_DONKEYID_CLASS_NAME "DonkeyId"
 
 #ifdef PHP_WIN32
 #	define PHP_DONKEYID_API __declspec(dllexport)
@@ -38,6 +39,19 @@ extern zend_module_entry donkeyid_module_entry;
 #include "TSRM.h"
 #endif
 
+PHP_MINIT_FUNCTION(donkeyid);
+PHP_MSHUTDOWN_FUNCTION(donkeyid);
+PHP_RINIT_FUNCTION(donkeyid);
+PHP_RSHUTDOWN_FUNCTION(donkeyid);
+PHP_MINFO_FUNCTION(donkeyid);
+
+
+//class method
+PHP_METHOD(PHP_DONKEYID_CLASS_NAME,__construct);
+PHP_METHOD(PHP_DONKEYID_CLASS_NAME,get_next_id);
+
+
+PHP_FUNCTION(confirm_donkeyid_compiled);	/* For testing, remove later. */
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     

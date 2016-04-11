@@ -7,9 +7,9 @@ dnl without editing.
 
 dnl If your extension references something external, use with:
 
-dnl PHP_ARG_WITH(donkeyid, for donkeyid support,
+PHP_ARG_WITH(donkeyid, for donkeyid support,
 dnl Make sure that the comment is aligned:
-dnl [  --with-donkeyid             Include donkeyid support])
+[  --with-donkeyid             Include donkeyid support])
 
 dnl Otherwise use enable:
 
@@ -59,5 +59,5 @@ if test "$PHP_DONKEYID" != "no"; then
   dnl
   dnl PHP_SUBST(DONKEYID_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(donkeyid, donkeyid.c, $ext_shared)
+  PHP_NEW_EXTENSION(donkeyid, donkeyid.c donkey_id.c, $ext_shared)
 fi
