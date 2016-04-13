@@ -53,13 +53,13 @@ PHP_MINFO_FUNCTION (donkeyid);
 
 
 //class method
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, set_node_id);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, setNodeId);
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_next_id);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId);
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_time_by_donkeyid);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime);
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_node_by_donkeyid);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId);
 
 
 PHP_FUNCTION (confirm_donkeyid_compiled);    /* For testing, remove later. */

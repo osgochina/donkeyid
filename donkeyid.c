@@ -30,19 +30,6 @@
 #include <inttypes.h>
 
 
-static int64_t S64(const char *s) {
-    int64_t i;
-    char c;
-    int scanned = sscanf(s, "%" SCNd64 "%c", &i, &c);
-    if (scanned == 1) return i;
-    if (scanned > 1) {
-        // TBD about extra data found
-        return i;
-    }
-    // TBD failed to scan;
-    return 0;
-}
-
 /* If you declare any globals in php_donkeyid.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(donkeyid)
 */
@@ -69,10 +56,10 @@ PHP_INI_END()
  */
 const zend_function_entry donkeyid_functions[] = {
         //PHP_ME(PHP_DONKEYID_CLASS_NAME, __construct, NULL,  ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, get_next_id, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, get_time_by_donkeyid, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, get_node_by_donkeyid, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, set_node_id, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, getNextId, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, NULL, ZEND_ACC_PUBLIC)
         PHP_FE(confirm_donkeyid_compiled, NULL)        /* For testing, remove later. */
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
 };
@@ -225,7 +212,7 @@ PHP_FUNCTION (confirm_donkeyid_compiled) {
 //	}
 //}
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, set_node_id) {
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, setNodeId) {
     long nodeid;
 
     //获取类方法的参数
@@ -240,15 +227,14 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, set_node_id) {
     RETURN_TRUE;
 }
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_next_id) {
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {
     char buffer[20];
-
     uint64_t donkeyid = get_donkey_id();
     sprintf(buffer, "%"PRIu64, donkeyid);
     RETVAL_STRING(buffer, 1);
 }
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_time_by_donkeyid) {
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
     char *val = NULL;
     int val_len;
 
@@ -256,17 +242,17 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_time_by_donkeyid) {
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
         return;
     }
-    int64_t id = S64(val);
+    uint64_t id = strtoul(val,NULL,10);
     if (id == 0) {
         RETURN_FALSE;
     }
-    int64_t time = GET_TIME_BY_DONKEYID(id);
+    uint64_t time = GET_TIME_BY_DONKEYID(id);
     char buffer[20];
     sprintf(buffer, "%"PRIu64, time);
     RETVAL_STRING(buffer, 1);
 }
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_node_by_donkeyid) {
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId) {
     char *val = NULL;
     int val_len;
 
@@ -274,11 +260,11 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_node_by_donkeyid) {
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
         return;
     }
-    int64_t id = S64(val);
+    uint64_t id = strtoul(val,NULL,10);
     if (id == 0) {
         RETURN_FALSE;
     }
-    int64_t time = GET_NODE_BY_DONKEYID(id);
+    uint64_t time = GET_NODE_BY_DONKEYID(id);
     char buffer[20];
     sprintf(buffer, "%"PRIu64, time);
     RETVAL_STRING(buffer, 1);
