@@ -32,10 +32,10 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 ```php
 
     $donkey = new DonkeyId();
-    $donkey->setNodeId(11);
+    $donkey->setNodeId(11); //0-511 不要超过这个值
     $id = $donkey->getNextId();
-    $time = $donkey->parseTime($id);
-    $node = $donkey->parseNodeId($id);
+    $time = $donkey->parseTime($id);  //返回的是1970-1-1 00:00:00 到生成事件的毫秒数
+    $node = $donkey->parseNodeId($id); //返回生成这个id的节点号
     
     echo "donkeyid=".$id."\n";
     echo "time=".date("Y-m-d H:i:s",$time/1000)."\n";
