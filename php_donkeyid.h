@@ -36,24 +36,33 @@ extern zend_module_entry donkeyid_module_entry;
 #endif
 
 #ifdef ZTS
+
 #include "TSRM.h"
+
 #endif
 
-PHP_MINIT_FUNCTION(donkeyid);
-PHP_MSHUTDOWN_FUNCTION(donkeyid);
-PHP_RINIT_FUNCTION(donkeyid);
-PHP_RSHUTDOWN_FUNCTION(donkeyid);
-PHP_MINFO_FUNCTION(donkeyid);
+PHP_MINIT_FUNCTION (donkeyid);
+
+PHP_MSHUTDOWN_FUNCTION (donkeyid);
+
+PHP_RINIT_FUNCTION (donkeyid);
+
+PHP_RSHUTDOWN_FUNCTION (donkeyid);
+
+PHP_MINFO_FUNCTION (donkeyid);
 
 
 //class method
-PHP_METHOD(PHP_DONKEYID_CLASS_NAME,set_node_id);
-PHP_METHOD(PHP_DONKEYID_CLASS_NAME,get_next_id);
-PHP_METHOD(PHP_DONKEYID_CLASS_NAME,get_time_by_donkeyid);
-PHP_METHOD(PHP_DONKEYID_CLASS_NAME,get_node_by_donkeyid);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, set_node_id);
+
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_next_id);
+
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_time_by_donkeyid);
+
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, get_node_by_donkeyid);
 
 
-PHP_FUNCTION(confirm_donkeyid_compiled);	/* For testing, remove later. */
+PHP_FUNCTION (confirm_donkeyid_compiled);    /* For testing, remove later. */
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
