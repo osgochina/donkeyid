@@ -21,11 +21,13 @@
 #define NODE_ID_LEFT_SHIFT (WORKER_ID_BITS+SEQUENCE_BITS)
 #define WORKER_ID_LEFT_SHIFT (SEQUENCE_BITS)
 
-#define GET_TIMESTAMP_BY_DONKEY_ID(id) (__uint64_t)(id>>TIMESTAMP_LEFT_SHIFT)
-#define GET_NODE_ID_BY_DONKEY_ID(id) (int)((id>>NODE_ID_LEFT_SHIFT)&NODE_ID_MASK)
-#define GET_WORKER_ID_BY_DONKEY_ID(id) (int)((id>>WORKER_ID_LEFT_SHIFT)&WORKER_ID_MASK)
-#define GET_SEQUENCE_BY_DONKEY_ID(id) (int)(id&SEQUENCE_MASK)
+#define TYPE_1_TIMESTAMP 1000000000
+#define TYPE_1_NODE_ID 1000000
 
+#define GET_TIMESTAMP_BY_DONKEY_ID(id,type) (type==0)?(__uint64_t)(id>>TIMESTAMP_LEFT_SHIFT):(id/TYPE_1_TIMESTAMP)
+#define GET_NODE_ID_BY_DONKEY_ID(id,type)  (type==0)?(int)((id>>NODE_ID_LEFT_SHIFT)&NODE_ID_MASK):(int)((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))/TYPE_1_NODE_ID)
+#define GET_WORKER_ID_BY_DONKEY_ID(id,type) (type==0)?(int)((id>>WORKER_ID_LEFT_SHIFT)&WORKER_ID_MASK):0
+#define GET_SEQUENCE_BY_DONKEY_ID(id,type) (type==0)?(int)(id&SEQUENCE_MASK):(int)((((id-(GET_TIMESTAMP_BY_DONKEY_ID(id,type)*TYPE_1_TIMESTAMP))-(GET_NODE_ID_BY_DONKEY_ID(id,type)*TYPE_1_NODE_ID)))/10)
 
 
 typedef struct {
@@ -35,13 +37,21 @@ typedef struct {
     int sequence;               //单服务器毫秒内的自增值
 } donkeyid_context_t;
 
-int donkeyid_init(int isshm, int type);
-void donkeyid_shutdown(int isshm);
-void donkeyid_atexit();
-void donkeyid_set_epoch(__time_t timestamp);
-void donkeyid_set_node_id(int node_id);
-__uint64_t donkeyid_next_id();
+int donkeyid_init(int);
 
+void donkeyid_set_type(int);
+
+void donkeyid_shutdown(int);
+
+void donkeyid_atexit();
+
+void donkeyid_set_epoch(__time_t);
+
+void donkeyid_set_node_id(int);
+
+void donkeyid_set_worker_id();
+
+__uint64_t donkeyid_next_id();
 
 
 #endif //DONKEYID_DONKEYID_H

@@ -24,13 +24,12 @@
 extern int ncpu;
 
 
-void spin_lock(atomic_t *lock, int which)
-{
+void spin_lock(atomic_t *lock, int which) {
     int i, n;
 
-    for ( ;; ) {
+    for (; ;) {
 
-        if (*lock == 0 && 
+        if (*lock == 0 &&
             __sync_bool_compare_and_swap(lock, 0, which)) {
             return;
         }
@@ -38,12 +37,12 @@ void spin_lock(atomic_t *lock, int which)
         if (ncpu > 1) {
 
             for (n = 1; n < 129; n << 1) {
-    
+
                 for (i = 0; i < n; i++) {
                     __asm("pause");
                 }
-    
-                if (*lock == 0 && 
+
+                if (*lock == 0 &&
                     __sync_bool_compare_and_swap(lock, 0, which)) {
                     return;
                 }
@@ -55,8 +54,7 @@ void spin_lock(atomic_t *lock, int which)
 }
 
 
-void spin_unlock(atomic_t *lock, int which)
-{
+void spin_unlock(atomic_t *lock, int which) {
     __sync_bool_compare_and_swap(lock, which, 0);
 }
 

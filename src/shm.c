@@ -8,11 +8,10 @@
 #ifdef MAP_ANON
 
 int
-shm_alloc(struct shm *shm)
-{
+shm_alloc(struct shm *shm) {
     shm->addr = (void *) mmap(NULL, shm->size,
-                                PROT_READ|PROT_WRITE,
-                              MAP_ANONYMOUS|MAP_SHARED, -1, 0);
+                              PROT_READ | PROT_WRITE,
+                              MAP_ANONYMOUS | MAP_SHARED, -1, 0);
 
     if (shm->addr == NULL) {
         return -1;
@@ -23,8 +22,7 @@ shm_alloc(struct shm *shm)
 
 
 void
-shm_free(struct shm *shm)
-{
+shm_free(struct shm *shm) {
     if (shm->addr) {
         munmap((void *) shm->addr, shm->size);
     }
