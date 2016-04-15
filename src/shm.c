@@ -12,7 +12,7 @@ shm_alloc(struct shm *shm)
 {
     shm->addr = (void *) mmap(NULL, shm->size,
                                 PROT_READ|PROT_WRITE,
-                                MAP_ANON|MAP_SHARED, -1, 0);
+                              MAP_ANONYMOUS|MAP_SHARED, -1, 0);
 
     if (shm->addr == NULL) {
         return -1;
