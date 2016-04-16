@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author: liuzhiming 187231450@qq.com                                                      |
   +----------------------------------------------------------------------+
 */
 
@@ -24,7 +24,7 @@
 extern zend_module_entry donkeyid_module_entry;
 #define phpext_donkeyid_ptr &donkeyid_module_entry
 
-#define PHP_DONKEYID_VERSION "0.1.0" /* Replace with version number for your extension */
+#define PHP_DONKEYID_VERSION "0.2.0" /* Replace with version number for your extension */
 #define PHP_DONKEYID_CLASS_NAME "DonkeyId"
 
 #ifdef PHP_WIN32

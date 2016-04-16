@@ -23,10 +23,14 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 
 ###运行
 ####api接口
+*
+* new DonkeyId($type=0,$epoch=0);//$type 类型 值有0,1 epoch 纪元开始时间戳 可以设置从此开始计算秒数
 * boolean setNodeId($node_id);
 * string getNextId();
 * string parseTime($id);
-* string parseNodeId($id);
+* int parseNodeId($id);
+* int parseWorkerId($id);
+* int parseSequence($id);
 
 ####测试代码
 ```php
@@ -36,9 +40,13 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
     $id = $donkey->getNextId();
     $time = $donkey->parseTime($id);  //返回的是1970-1-1 00:00:00 到生成事件的毫秒数
     $node = $donkey->parseNodeId($id); //返回生成这个id的节点号
+    $worker_id = $donkey->parseWorkerId($id); //返回生成id的进程号 不过是被处理过的，最多0-31
+    $sequence = $donkey->parseSequence($id);  //返回同一时间内生成的序号
     
     echo "donkeyid=".$id."\n";
     echo "time=".date("Y-m-d H:i:s",$time/1000)."\n";
     echo "node=".$node."\n";
+    echo "workerid=".$worker_id."\n";
+    echo "sequence=".$sequence."\n";
    
 ```

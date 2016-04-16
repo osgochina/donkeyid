@@ -1,6 +1,20 @@
-//
-// Created by liuzhiming on 16-4-14.
-//
+/*
+  +----------------------------------------------------------------------+
+  | PHP Version 5                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2015 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.01 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_01.txt                                  |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Author: liuzhiming 187231450@qq.com                                                      |
+  +----------------------------------------------------------------------+
+*/
 
 #ifndef DONKEYID_DONKEYID_H
 #define DONKEYID_DONKEYID_H
@@ -46,6 +60,7 @@ void donkeyid_shutdown();
 void donkeyid_atexit();
 
 void donkeyid_set_epoch(__time_t);
+__uint64_t get_curr_timestamp();
 
 void donkeyid_set_node_id(int);
 
