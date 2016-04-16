@@ -53,16 +53,16 @@ PHP_MINFO_FUNCTION (donkeyid);
 
 
 //class method
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __destruct);
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, setNodeId);
-
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId);
-
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime);
-
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseWorkerId);
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence);
 
 
-PHP_FUNCTION (confirm_donkeyid_compiled);    /* For testing, remove later. */
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     

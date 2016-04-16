@@ -24,10 +24,10 @@
 #define TYPE_1_TIMESTAMP 1000000000
 #define TYPE_1_NODE_ID 1000000
 
-#define GET_TIMESTAMP_BY_DONKEY_ID(id,type) (type==0)?(__uint64_t)(id>>TIMESTAMP_LEFT_SHIFT):(id/TYPE_1_TIMESTAMP)
+#define GET_TIMESTAMP_BY_DONKEY_ID(id,type,epoch) (type==0)?((__uint64_t)(id>>TIMESTAMP_LEFT_SHIFT)+(epoch*1000)):(__uint64_t)((id+epoch*TYPE_1_TIMESTAMP)/TYPE_1_TIMESTAMP)
 #define GET_NODE_ID_BY_DONKEY_ID(id,type)  (type==0)?(int)((id>>NODE_ID_LEFT_SHIFT)&NODE_ID_MASK):(int)((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))/TYPE_1_NODE_ID)
 #define GET_WORKER_ID_BY_DONKEY_ID(id,type) (type==0)?(int)((id>>WORKER_ID_LEFT_SHIFT)&WORKER_ID_MASK):0
-#define GET_SEQUENCE_BY_DONKEY_ID(id,type) (type==0)?(int)(id&SEQUENCE_MASK):(int)((((id-(GET_TIMESTAMP_BY_DONKEY_ID(id,type)*TYPE_1_TIMESTAMP))-(GET_NODE_ID_BY_DONKEY_ID(id,type)*TYPE_1_NODE_ID)))/10)
+#define GET_SEQUENCE_BY_DONKEY_ID(id,type) (type==0)?(int)(id&SEQUENCE_MASK):(int)((((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))-(GET_NODE_ID_BY_DONKEY_ID(id,type)*TYPE_1_NODE_ID)))/10)
 
 
 typedef struct {
@@ -41,7 +41,7 @@ int donkeyid_init(int);
 
 void donkeyid_set_type(int);
 
-void donkeyid_shutdown(int);
+void donkeyid_shutdown();
 
 void donkeyid_atexit();
 

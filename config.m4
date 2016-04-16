@@ -59,5 +59,9 @@ if test "$PHP_DONKEYID" != "no"; then
   dnl
   dnl PHP_SUBST(DONKEYID_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(donkeyid, donkeyid.c donkey_id.c, $ext_shared)
+  donkeyid_source_file="donkeyid.c \
+        src/donkeyid.c \
+        src/shm.c \
+        src/spinlock.c"
+  PHP_NEW_EXTENSION(donkeyid, $donkeyid_source_file, $ext_shared)
 fi

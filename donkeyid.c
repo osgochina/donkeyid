@@ -26,8 +26,9 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_donkeyid.h"
-#include "donkey_id.h"
+#include "src/donkeyid.h"
 #include <inttypes.h>
+#include <main/SAPI.h>
 
 
 /* If you declare any globals in php_donkeyid.h uncomment this:
@@ -55,12 +56,14 @@ PHP_INI_END()
  * Every user visible function must have an entry in donkeyid_functions[].
  */
 const zend_function_entry donkeyid_functions[] = {
-        //PHP_ME(PHP_DONKEYID_CLASS_NAME, __construct, NULL,  ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, __construct, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, __destruct, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, getNextId, NULL, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, NULL, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, NULL, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, NULL, ZEND_ACC_PUBLIC)
-        PHP_FE(confirm_donkeyid_compiled, NULL)        /* For testing, remove later. */
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseWorkerId, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseSequence, NULL, ZEND_ACC_PUBLIC)
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
 };
 /* }}} */
@@ -119,9 +122,15 @@ PHP_MINIT_FUNCTION (donkeyid) {
     zend_class_entry donkeyid_class_entry;
     INIT_CLASS_ENTRY(donkeyid_class_entry, PHP_DONKEYID_CLASS_NAME, donkeyid_functions);
     donkeyid_ce = zend_register_internal_class(&donkeyid_class_entry TSRMLS_CC);
-
     //init error
     zend_declare_property_null(donkeyid_ce, ZEND_STRL("error"), ZEND_ACC_PRIVATE TSRMLS_CC);
+    //根据运行环境初始化不同的内存使用方式
+    if (!strcasecmp(sapi_module.name,"cli")){
+        donkeyid_init(0);
+    }else{
+        donkeyid_init(1);
+    }
+    atexit(donkeyid_atexit);
     return SUCCESS;
 }
 /* }}} */
@@ -132,6 +141,7 @@ PHP_MSHUTDOWN_FUNCTION (donkeyid) {
     /* uncomment this line if you have INI entries
     UNREGISTER_INI_ENTRIES();
     */
+    donkeyid_shutdown();
     return SUCCESS;
 }
 /* }}} */
@@ -140,6 +150,7 @@ PHP_MSHUTDOWN_FUNCTION (donkeyid) {
 /* {{{ PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION (donkeyid) {
+    donkeyid_set_worker_id();
     return SUCCESS;
 }
 /* }}} */
@@ -168,75 +179,76 @@ PHP_MINFO_FUNCTION (donkeyid) {
 }
 /* }}} */
 
+/* The previous line is meant for vim and emacs, so it can correctly fold and
+   unfold functions in source code. See the corresponding marks just before
+   function definition, where the functions purpose is also documented. Please
+   follow this convention for the convenience of others editing your code.
+*/
 
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_donkeyid_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION (confirm_donkeyid_compiled) {
-    char *arg = NULL;
-    int arg_len, len;
-    char *strg;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
-        return;
+
+/* The previous line is meant for vim and emacs, so it can correctly fold and
+   unfold functions in source code. See the corresponding marks just before
+   function definition, where the functions purpose is also documented. Please
+   follow this convention for the convenience of others editing your code.
+*/
+PHP_METHOD(PHP_DONKEYID_CLASS_NAME,__construct)
+{
+	long type = 0;
+    char *val = 0;
+    int val_len;
+	//获取类方法的参数
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,"|ls",&type,&val,&val_len) == FAILURE){
+        RETURN_FALSE;
+	}
+    //不是1就是0
+    if(type<0 && type > 1){
+        type = 0;
     }
-
-    len = spprintf(&strg, 0,
-                   "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.",
-                   "donkeyid", arg);
-    RETURN_STRINGL(strg, len, 0);
+    zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("type"), type TSRMLS_CC);
+    donkeyid_set_type((int)type);
+    //设置纪元
+    __time_t epoch = strtoul(val,NULL,10);
+    if (epoch < 0) {
+        epoch = 0LLU;
+    }
+    donkeyid_set_epoch(epoch);
+    zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("epoch"), epoch TSRMLS_CC);
 }
-/* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and
-   unfold functions in source code. See the corresponding marks just before
-   function definition, where the functions purpose is also documented. Please
-   follow this convention for the convenience of others editing your code.
-*/
-
-
-
-/* The previous line is meant for vim and emacs, so it can correctly fold and
-   unfold functions in source code. See the corresponding marks just before
-   function definition, where the functions purpose is also documented. Please
-   follow this convention for the convenience of others editing your code.
-*/
-//PHP_METHOD(PHP_DONKEYID_CLASS_NAME,__construct)
-//{
-//	zval* self = getThis();
-//	char *val = NULL;
-//	int val_len;
-//
-//	//获取类方法的参数
-//	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,"s",&val,&val_len) == FAILURE){
-//		return;
-//	}
-//}
+PHP_METHOD(PHP_DONKEYID_CLASS_NAME,__destruct)
+{
+    return;
+}
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, setNodeId) {
-    long nodeid;
 
+    long nodeid;
     //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "l", &nodeid) == FAILURE) {
         return;
     }
-
     if (nodeid < 0 && nodeid > 255) {
         RETURN_FALSE;
     }
-    set_node_id(nodeid);
+    donkeyid_set_node_id((int)nodeid);
     RETURN_TRUE;
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {
-    char buffer[20];
-    uint64_t donkeyid = get_donkey_id();
-    sprintf(buffer, "%"PRIu64, donkeyid);
-    RETVAL_STRING(buffer, 1);
+
+    char buffer[64];
+    int len;
+    uint64_t donkeyid = donkeyid_next_id();
+    len = sprintf(buffer, "%"PRIu64, donkeyid);
+
+    RETURN_STRINGL(buffer,len, 1);
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
     char *val = NULL;
     int val_len;
+    char buffer[64];
+    int len;
 
     //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
@@ -246,15 +258,18 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
     if (id == 0) {
         RETURN_FALSE;
     }
-    uint64_t time = GET_TIME_BY_DONKEYID(id);
-    char buffer[20];
-    sprintf(buffer, "%"PRIu64, time);
-    RETVAL_STRING(buffer, 1);
+    zval *ztype = zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    zval *zepoch = zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("epoch"), 0 TSRMLS_CC);
+    uint64_t time = GET_TIMESTAMP_BY_DONKEY_ID(id,Z_LVAL_P(ztype),Z_LVAL_P(zepoch));
+    len = sprintf(buffer, "%"PRIu64, Z_LVAL_P(ztype) == 0?time:time*1000);
+    RETURN_STRINGL(buffer,len, 1);
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId) {
     char *val = NULL;
     int val_len;
+    char buffer[64];
+    int len;
 
     //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
@@ -264,10 +279,50 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId) {
     if (id == 0) {
         RETURN_FALSE;
     }
-    uint64_t time = GET_NODE_BY_DONKEYID(id);
-    char buffer[20];
-    sprintf(buffer, "%"PRIu64, time);
-    RETVAL_STRING(buffer, 1);
+    zval *ztype = zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    int nodeid = GET_NODE_ID_BY_DONKEY_ID(id,Z_LVAL_P(ztype));
+    len = sprintf(buffer, "%d", nodeid);
+    RETURN_STRINGL(buffer,len, 1);
+}
+
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseWorkerId) {
+    char *val = NULL;
+    int val_len;
+    char buffer[64];
+    int len;
+
+    //获取类方法的参数
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
+        return;
+    }
+    uint64_t id = strtoul(val,NULL,10);
+    if (id == 0) {
+        RETURN_FALSE;
+    }
+    zval *ztype = zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    int nodeid = GET_WORKER_ID_BY_DONKEY_ID(id,Z_LVAL_P(ztype));
+    len = sprintf(buffer, "%d", nodeid);
+    RETURN_STRINGL(buffer,len, 1);
+}
+
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence) {
+    char *val = NULL;
+    int val_len;
+    char buffer[64];
+    int len;
+
+    //获取类方法的参数
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
+        return;
+    }
+    uint64_t id = strtoul(val,NULL,10);
+    if (id == 0) {
+        RETURN_FALSE;
+    }
+    zval *ztype = zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    int nodeid = GET_SEQUENCE_BY_DONKEY_ID(id,Z_LVAL_P(ztype));
+    len = sprintf(buffer, "%d", nodeid);
+    RETURN_STRINGL(buffer,len, 1);
 }
 
 

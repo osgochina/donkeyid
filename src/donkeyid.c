@@ -17,6 +17,7 @@ static struct shm shmctx;
 static char *ctxaddr;
 static int pid = -1;
 static int worker_id = 0;
+static int isshm = 0;
 
 typedef struct {
     atomic_t lock;
@@ -29,8 +30,8 @@ static int dtype = 0;
 /**
  *  初始化
  */
-int donkeyid_init(int isshm) {
-
+int donkeyid_init(int _isshm) {
+    isshm = _isshm;
     //是否使用共享内存
     if (isshm <= 0) {
         ctxaddr = malloc(sizeof(dtypes));
@@ -60,7 +61,7 @@ int donkeyid_init(int isshm) {
 /**
  * 正常结束结束释放内存
  */
-void donkeyid_shutdown(int isshm) {
+void donkeyid_shutdown() {
     if (isshm <= 0) {
         free(ctxaddr);
         ctxaddr = NULL;
@@ -73,7 +74,10 @@ void donkeyid_shutdown(int isshm) {
  * 出错结束
  */
 void donkeyid_atexit() {
-
+    if(lock->lock == pid){
+        spin_unlock(&(lock->lock),pid);
+    }
+    donkeyid_shutdown();
 }
 
 /**
@@ -91,14 +95,18 @@ void donkeyid_set_epoch(__time_t timestamp) {
     if (timestamp <= 0) {
         timestamp = 0;
     }
+    spin_lock(&(lock->lock),pid);
     lock->donkeyid_context.epoch = (__uint64_t) ((timestamp & 0xFFFFFFFF) * 1000);
+    spin_unlock(&(lock->lock),pid);
 }
 
 /**
  * 设置节点id
  */
 void donkeyid_set_node_id(int node_id) {
+    spin_lock(&(lock->lock),pid);
     lock->donkeyid_context.node_id = node_id & NODE_ID_MASK;
+    spin_unlock(&(lock->lock),pid);
 }
 
 /**
@@ -225,23 +233,24 @@ __uint64_t donkeyid_next_id() {
 }
 
 
-int main() {
-    int type = 1;
-    donkeyid_init(0);
-    donkeyid_set_type(type);
-    donkeyid_set_node_id(99);
-    donkeyid_set_worker_id();
-    donkeyid_set_epoch(1460710318);
-
-    int i = 0;
-    for (i = 0; i < 1; ++i) {
-        __uint64_t donkeyid = donkeyid_next_id();
-        printf("%"PRIu64"\n", donkeyid);
-        printf("%"PRIu64"\n",GET_TIMESTAMP_BY_DONKEY_ID(donkeyid,type));
-        printf("%d\n",GET_NODE_ID_BY_DONKEY_ID(donkeyid,type));
-        printf("%d\n",GET_WORKER_ID_BY_DONKEY_ID(donkeyid,type));
-        printf("%d\n",GET_SEQUENCE_BY_DONKEY_ID(donkeyid,type));
-    }
-    donkeyid_shutdown(1);
-}
+//int main() {
+//    int type = 1;
+//    long epoch = 1460710318;
+//    donkeyid_init(0);
+//    donkeyid_set_worker_id();
+//    donkeyid_set_type(type);
+//    donkeyid_set_node_id(99);
+//    donkeyid_set_epoch(epoch);
+//
+//    int i = 0;
+//    for (i = 0; i < 1; ++i) {
+//        __uint64_t donkeyid = donkeyid_next_id();
+//        printf("%"PRIu64"\n", donkeyid);
+//        printf("%"PRIu64"\n",GET_TIMESTAMP_BY_DONKEY_ID(donkeyid,type,epoch));
+//        printf("%d\n",GET_NODE_ID_BY_DONKEY_ID(donkeyid,type));
+//        printf("%d\n",GET_WORKER_ID_BY_DONKEY_ID(donkeyid,type));
+//        printf("%d\n",GET_SEQUENCE_BY_DONKEY_ID(donkeyid,type));
+//    }
+//    donkeyid_shutdown(1);
+//}
 
