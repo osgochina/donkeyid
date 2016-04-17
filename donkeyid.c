@@ -170,7 +170,9 @@ PHP_RSHUTDOWN_FUNCTION (donkeyid) {
  */
 PHP_MINFO_FUNCTION (donkeyid) {
     php_info_print_table_start();
-    php_info_print_table_header(2, "donkeyid support", "enabled");
+    php_info_print_table_header(2, "DonkeyId support", "enabled");
+    php_info_print_table_row(2, "Version", PHP_DONKEYID_VERSION);
+    php_info_print_table_row(2, "Author", "zhiming.liu[email: 187231450@qq.com]");
     php_info_print_table_end();
 
     /* Remove comments if you have entries in php.ini
