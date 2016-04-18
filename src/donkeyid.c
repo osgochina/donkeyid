@@ -45,6 +45,7 @@ static int dtype = 0;
  *  初始化
  */
 int donkeyid_init(int _isshm) {
+
     isshm = _isshm;
     //是否使用共享内存
     if (isshm <= 0) {
@@ -80,7 +81,10 @@ void donkeyid_shutdown() {
         free(ctxaddr);
         ctxaddr = NULL;
     } else {
-        shm_free(&shmctx);
+        if (shmctx.size){
+            shm_free(&shmctx);
+        }
+
     }
 }
 
