@@ -22,9 +22,9 @@
 #include <bits/types.h>
 
 #define TIMESTAMP_BITS 42   //时间所占bit位数
-#define NODE_ID_BITS 7      //节点所占bit位数
+#define NODE_ID_BITS 8      //节点所占bit位数
 #define WORKER_ID_BITS 5    //进程worker所占bit位数
-#define SEQUENCE_BITS 8     //毫秒内自增
+#define SEQUENCE_BITS 9     //毫秒内自增
 
 #define TIMESTAMP_MASK (-1LL^(-1LL<<TIMESTAMP_BITS))
 #define NODE_ID_MASK (-1^(-1<<NODE_ID_BITS))
