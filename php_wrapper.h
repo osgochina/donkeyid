@@ -12,6 +12,7 @@
 
 #define dk_zend_read_property zend_read_property
 #define DK_RETURN_STRINGL RETURN_STRINGL
+typedef int zend_size_t;
 
 #else
 
@@ -21,6 +22,7 @@ static inline zval* dk_zend_read_property(zend_class_entry *scope, zval *object,
     zval rv;
     return zend_read_property(scope,object,name,name_length,silent,&rv);
 }
+typedef size_t zend_size_t;
 
 #endif
 

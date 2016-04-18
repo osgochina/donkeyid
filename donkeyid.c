@@ -197,7 +197,7 @@ PHP_MINFO_FUNCTION (donkeyid) {
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     long type = 0;
     char *val = 0;
-    int val_len;
+    zend_size_t val_len;
 //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "|ls", &type, &val, &val_len) == FAILURE) {
         RETURN_FALSE;
@@ -250,12 +250,11 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
     char *val = NULL;
-    int val_len;
+    zend_size_t val_len;
     char buffer[64];
     int len;
-
-//获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
+    //获取类方法的参数
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
         return;
     }
     uint64_t id = strtoul(val, NULL, 10);
@@ -271,7 +270,7 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId) {
     char *val = NULL;
-    int val_len;
+    zend_size_t val_len;
 
 //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
@@ -288,7 +287,7 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId) {
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseWorkerId) {
     char *val = NULL;
-    int val_len;
+    zend_size_t val_len;
 
 //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
@@ -305,7 +304,7 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseWorkerId) {
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence) {
     char *val = NULL;
-    int val_len;
+    zend_size_t val_len;
 
 //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {

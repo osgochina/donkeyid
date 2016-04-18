@@ -50,3 +50,5 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
     echo "sequence=".$sequence."\n";
    
 ```
+#### 支持版本
+> 支持 php5.3+ ,支持php 7
