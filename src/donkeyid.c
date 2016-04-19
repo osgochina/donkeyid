@@ -92,8 +92,11 @@ void donkeyid_shutdown() {
  * 出错结束
  */
 void donkeyid_atexit() {
-    if(lock->lock == pid){
-        spin_unlock(&(lock->lock),pid);
+    int i;
+    for (i = 0; i <= dtype ; i++) {
+        if((lock+i)->lock == pid){
+            spin_unlock(&((lock+1)->lock),pid);
+        }
     }
     donkeyid_shutdown();
 }
@@ -103,7 +106,7 @@ void donkeyid_atexit() {
  */
 void donkeyid_set_type(int type) {
     dtype = type;
-    lock += dtype;
+    //lock += dtype;
 }
 
 /**
@@ -113,18 +116,18 @@ void donkeyid_set_epoch(__time_t timestamp) {
     if (timestamp <= 0) {
         timestamp = 0;
     }
-    spin_lock(&(lock->lock),pid);
-    lock->donkeyid_context.epoch = (__uint64_t) ((timestamp & 0xFFFFFFFF) * 1000);
-    spin_unlock(&(lock->lock),pid);
+    spin_lock(&((lock+dtype)->lock),pid);
+    (lock+dtype)->donkeyid_context.epoch = (__uint64_t) ((timestamp & 0xFFFFFFFF) * 1000);
+    spin_unlock(&((lock+dtype)->lock),pid);
 }
 
 /**
  * 设置节点id
  */
 void donkeyid_set_node_id(int node_id) {
-    spin_lock(&(lock->lock),pid);
-    lock->donkeyid_context.node_id = node_id & NODE_ID_MASK;
-    spin_unlock(&(lock->lock),pid);
+    spin_lock(&((lock+dtype)->lock),pid);
+    (lock+dtype)->donkeyid_context.node_id = node_id & NODE_ID_MASK;
+    spin_unlock(&((lock+dtype)->lock),pid);
 }
 
 /**
@@ -187,7 +190,7 @@ static __uint64_t wait_next_stamp(__uint64_t now) {
  */
 __uint64_t donkeyid_next_id() {
     __uint64_t id;
-    spin_lock(&(lock->lock), pid);
+    spin_lock(&((lock+dtype)->lock), pid);
     //根据不同的类型，生成不同类型的id
     switch (dtype) {
         //生成10进制基地的自增id
@@ -197,23 +200,23 @@ __uint64_t donkeyid_next_id() {
                 id =  0ULL;
                 goto unlock_end;
             }
-            if (now < lock->donkeyid_context.last_timestamp) {
-                lock->donkeyid_context.last_timestamp = now;
+            if (now < (lock+dtype)->donkeyid_context.last_timestamp) {
+                (lock+dtype)->donkeyid_context.last_timestamp = now;
             }
-            if (now == lock->donkeyid_context.last_timestamp) {
-                lock->donkeyid_context.sequence = lock->donkeyid_context.sequence + 1 & 0xFFFF;
-                if (lock->donkeyid_context.sequence == 0) {
+            if (now == (lock+dtype)->donkeyid_context.last_timestamp) {
+                (lock+dtype)->donkeyid_context.sequence = (lock+dtype)->donkeyid_context.sequence + 1 & 0xFFFF;
+                if ((lock+dtype)->donkeyid_context.sequence == 0) {
                     now = wait_next_stamp(now);
                 }
             } else {
                 //使得生成的id尾号均匀
                 srand(now);
-                lock->donkeyid_context.sequence = rand() % 10;
+                (lock+dtype)->donkeyid_context.sequence = rand() % 10;
             }
-            lock->donkeyid_context.last_timestamp = now;
-            id = ((__uint64_t) (((now - (lock->donkeyid_context.epoch != 0?lock->donkeyid_context.epoch/1000:0))) & 0xFFFFFFFF) * TYPE_1_TIMESTAMP)
-                 +((__uint64_t)(lock->donkeyid_context.node_id & 0xFF) * 1000000)
-                 +((__uint64_t)lock->donkeyid_context.sequence * 10);
+            (lock+dtype)->donkeyid_context.last_timestamp = now;
+            id = ((__uint64_t) (((now - ((lock+dtype)->donkeyid_context.epoch != 0?(lock+dtype)->donkeyid_context.epoch/1000:0))) & 0xFFFFFFFF) * TYPE_1_TIMESTAMP)
+                 +((__uint64_t)((lock+dtype)->donkeyid_context.node_id & 0xFF) * 1000000)
+                 +((__uint64_t)(lock+dtype)->donkeyid_context.sequence * 10);
             break;
         }
         //默认类型
@@ -224,29 +227,29 @@ __uint64_t donkeyid_next_id() {
                 id =  0ULL;
                 goto unlock_end;
             }
-            if (now < lock->donkeyid_context.last_timestamp) {
-                lock->donkeyid_context.last_timestamp = now;
+            if (now < (lock+dtype)->donkeyid_context.last_timestamp) {
+                (lock+dtype)->donkeyid_context.last_timestamp = now;
             }
-            if (now == lock->donkeyid_context.last_timestamp) {
-                lock->donkeyid_context.sequence = lock->donkeyid_context.sequence + 1 & SEQUENCE_MASK;
-                if (lock->donkeyid_context.sequence == 0) {
+            if (now == (lock+dtype)->donkeyid_context.last_timestamp) {
+                (lock+dtype)->donkeyid_context.sequence = lock->donkeyid_context.sequence + 1 & SEQUENCE_MASK;
+                if ((lock+dtype)->donkeyid_context.sequence == 0) {
                     now = wait_next_ms();
                 }
             } else {
                 //使得生成的id尾号均匀
                 srand(now);
-                lock->donkeyid_context.sequence = rand() % 2;
+                (lock+dtype)->donkeyid_context.sequence = rand() % 2;
             }
-            lock->donkeyid_context.last_timestamp = now;
-            id = ((__uint64_t) ((now - lock->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
-                 | ((__uint64_t) (lock->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
+            (lock+dtype)->donkeyid_context.last_timestamp = now;
+            id = ((__uint64_t) ((now - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+                 | ((__uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
                  | ((__uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
-                 | ((__uint64_t) lock->donkeyid_context.sequence);
+                 | ((__uint64_t) (lock+dtype)->donkeyid_context.sequence);
             break;
         }
     }
     unlock_end:
-    spin_unlock(&(lock->lock), pid);
+    spin_unlock(&((lock+dtype)->lock), pid);
     return id;
 }
 

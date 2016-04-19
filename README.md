@@ -52,3 +52,4 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 ```
 #### 支持版本
 > 支持 php5.3+ ,支持php 7
+> 可以配置swoole使用,[donkeyid_server](https://github.com/osgochina/donkeyid_server.git)

@@ -198,20 +198,21 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     long type = 0;
     char *val = 0;
     zend_size_t val_len;
-//获取类方法的参数
+    //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "|ls", &type, &val, &val_len) == FAILURE) {
         RETURN_FALSE;
     }
-//不是1就是0
+    //不是1就是0
     if (type < 0 && type > 1) {
         type = 0;
     }
+
     zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("type"), type TSRMLS_CC);
-    donkeyid_set_type((int) type);
+
     if (val_len <= 0 || val_len >= 19) {
         val = "0";
     }
-//设置纪元
+    //设置纪元
     __time_t epoch = strtoul(val, NULL, 10);
     if (epoch < 0 && epoch >= get_curr_timestamp()) {
         epoch = 0LLU;
@@ -242,6 +243,9 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {
 
     char buffer[64];
     int len;
+    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    donkeyid_set_type((int) Z_LVAL_P(ztype));
+
     uint64_t donkeyid = donkeyid_next_id();
     len = sprintf(buffer, "%"PRIu64, donkeyid);
 
@@ -254,7 +258,7 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
     char buffer[64];
     int len;
     //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
         return;
     }
     uint64_t id = strtoul(val, NULL, 10);
