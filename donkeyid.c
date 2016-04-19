@@ -122,15 +122,10 @@ PHP_MINIT_FUNCTION (donkeyid) {
     zend_class_entry donkeyid_class_entry;
     INIT_CLASS_ENTRY(donkeyid_class_entry, PHP_DONKEYID_CLASS_NAME, donkeyid__methods);
     donkeyid_ce = zend_register_internal_class(&donkeyid_class_entry TSRMLS_CC);
-    //init error
-    zend_declare_property_null(donkeyid_ce, ZEND_STRL("error"), ZEND_ACC_PRIVATE TSRMLS_CC);
-    //根据运行环境初始化不同的内存使用方式
-    if (!strcasecmp(sapi_module.name, "cli")) {
-        donkeyid_init(0);
-    } else {
-        donkeyid_init(1);
+    if (donkeyid_init(1) == -1){
+        return FAILURE;
     }
-    atexit(donkeyid_atexit);
+    atexit(donkeyid_shutdown);
     return SUCCESS;
 }
 /* }}} */

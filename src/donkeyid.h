@@ -57,7 +57,6 @@ void donkeyid_set_type(int);
 
 void donkeyid_shutdown();
 
-void donkeyid_atexit();
 
 void donkeyid_set_epoch(__time_t);
 __uint64_t get_curr_timestamp();

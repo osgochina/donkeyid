@@ -77,36 +77,32 @@ int donkeyid_init(int _isshm) {
  * 正常结束结束释放内存
  */
 void donkeyid_shutdown() {
-    if (isshm <= 0) {
-        free(ctxaddr);
-        ctxaddr = NULL;
+    if (isshm <= 0 ) {
+        if (ctxaddr != NULL){
+            free(ctxaddr);
+            ctxaddr = NULL;
+        }
     } else {
         if (shmctx.size){
+            int i;
+            for (i = 0; i <= dtype ; i++) {
+                if((lock+i)->lock == pid){
+                    spin_unlock(&((lock+i)->lock),pid);
+                }
+            }
             shm_free(&shmctx);
+            shmctx.size = 0;
         }
 
     }
 }
 
-/**
- * 出错结束
- */
-void donkeyid_atexit() {
-    int i;
-    for (i = 0; i <= dtype ; i++) {
-        if((lock+i)->lock == pid){
-            spin_unlock(&((lock+1)->lock),pid);
-        }
-    }
-    donkeyid_shutdown();
-}
 
 /**
  * 设置id生成类型
  */
 void donkeyid_set_type(int type) {
     dtype = type;
-    //lock += dtype;
 }
 
 /**

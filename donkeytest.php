@@ -1,7 +1,7 @@
 <?php
 
 
-    $donkey = new DonkeyId(1,"1460710318");
+    $donkey = new DonkeyId(0,"1460710318");
     $donkey->setNodeId(11);
     $id = $donkey->getNextId();
     $time = $donkey->parseTime($id);
