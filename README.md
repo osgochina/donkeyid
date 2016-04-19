@@ -17,7 +17,7 @@
 > 下载代码到本地，进入项目文件夹，执行
 
 ```Bash
-/path/to/phpize &&  ./configure && make && make install
+cd ./donkeyid && /path/to/phpize &&  ./configure && make && make install
 ```
 
 ```Bssh
@@ -64,4 +64,7 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 ```
 #### 支持版本
 > 支持 php5.3+ ,支持php 7
-> 可以配置swoole使用,[donkeyid_server](https://github.com/osgochina/donkeyid_server.git)
+
+# 基于swoole的id生成器server
+
+提供http的api接口，方便部署多台机器。
