@@ -35,10 +35,10 @@ class Route
         $path_info = trim($path_info,"/");
         $params = explode("/",$path_info);
         $count = count($params);
-        if($count < 2){
+        if($count < 1){
             return $this->error("parameter error!");
         }
-        $type = $params[1];
+        $type = isset($params[1])?$params[1]:0;
         switch(strtolower($params[0])){
             case "getnextid": {
 
@@ -67,6 +67,21 @@ class Route
                 }
                 return $this->success($d);
             }
+            case "getidbytime":{
+                if(!isset($params[2]) || !isset($params[3])){
+                    return $this->error("parameter error!");
+                }
+                $time = $params[2];
+                $num = $params[3];
+
+                if ( $type == 0) {
+                    $ids = $this->donkeyid0->getIdByTime($time,$num);
+                } elseif ($type == 1) {
+                    $ids = $this->donkeyid1->getIdByTime($time,$num);
+                }
+                return $this->success($ids);
+            }
+          
         }
 
     }

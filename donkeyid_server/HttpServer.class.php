@@ -13,17 +13,25 @@ class HttpServer
     private $setting = array(
         "host"                     => "127.0.0.1",
         "port"                     => "9521",
-        "reactor_num"              => 8,  //reactor线程数
-        "worker_num"               => 8, //worker进程数
+        "reactor_num"              => 4,  //reactor线程数
+        "worker_num"               => 4, //worker进程数
     );
     public  $route;
+    public static $daemon = false;
+    public static $pid_file = false;
 
     public function __construct($setting = array())
     {
         $this->formatSetting($setting);
-        $this->route = new Route();
+        $this->__init();
         $this->run();
-
+    }
+    public function __init(){
+        if(HttpServer::$daemon){
+            swoole_process::daemon();
+        }
+        $this->route = new Route();
+        file_put_contents(self::$pid_file,posix_getpid());
     }
 
     /**
