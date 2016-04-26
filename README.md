@@ -77,10 +77,10 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 提供http的api接口，方便部署多台机器。
 ###部署启动
 > donkeyid_server 有以下启动方式：
+
 ```
     帮助信息:
     Usage: /path/to/php main.php [options] -- [args...]
-
     --help             显示帮助信息
     -h  [--host]       ip地址,默认监听127.0.0.1
     -p  [--port]       端口,默认9521
@@ -90,6 +90,7 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
     -s  stop           停止进程
     -d  [--daemon]     是否后台运行
 ```
+
 ###http接口
 
 > 启动server以后通过url访问：
@@ -104,7 +105,6 @@ http://127.0.0.1:9521/getNextid/1   //获取10进制相乘类型id
 http://127.0.0.1:9521/getIdByTime/{$type}/{$time}/{$num}   //$type[0|1],$time 时间戳 ,$num 数量
                                                            //批量生成指定时间，指定数量的id。
                                                            //type=0 num需要小于512000 type=1 num需小于9999
-
 http://127.0.0.1:9521/parseId/0/$id //解析默认类型ID
 http://127.0.0.1:9521/parseId/1/$id //解析10进制相乘类型ID
 解析的返回值有：
@@ -117,5 +117,4 @@ http://127.0.0.1:9521/parseId/1/$id //解析10进制相乘类型ID
         "sequence":0            //自增值
         }
 }
-
 ```
