@@ -244,15 +244,27 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __destruct) {
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, setNodeId) {
 
     long nodeid;
-//获取类方法的参数
+    //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "l", &nodeid) == FAILURE) {
         return;
     }
-    if (nodeid < 0 && nodeid > 255) {
-        RETURN_FALSE;
-    }
     zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
-    donkeyid_set_type((int) Z_LVAL_P(ztype));
+    int type = (int) Z_LVAL_P(ztype);
+    if (type == 0){
+        if (nodeid >= NODE_ID_MASK) {
+            nodeid = NODE_ID_MASK;
+        } else if(nodeid <= 0){
+            nodeid = 0;
+        }
+    } else if(type == 1){
+        if (nodeid >= TYPE_1_NODE_ID_MASK) {
+            nodeid = TYPE_1_NODE_ID_MASK;
+        } else if(nodeid <= 0){
+            nodeid = 0;
+        }
+    }
+
+    donkeyid_set_type(type);
 
     donkeyid_set_node_id((int) nodeid);
     RETURN_TRUE;
@@ -287,14 +299,27 @@ ZEND_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime) {
     if (time == 0) {
         RETURN_FALSE;
     }
-    if (num >= MAX_BATCH_ID_LEN){
-        num = MAX_BATCH_ID_LEN;
+    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    int type = (int) Z_LVAL_P(ztype);
+    if (type == 0 ){
+        if(num >= MAX_BATCH_ID_LEN){
+            num = MAX_BATCH_ID_LEN;
+        } else if(num <= 0){
+            num = 1;
+        }
+
+    } else if (type == 1){
+        if(num >= TYPE_1_SEQUENCE_MASK){
+            num = TYPE_1_SEQUENCE_MASK;
+        } else if(num <= 0){
+            num = 1;
+        }
     }
 
-    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
-    donkeyid_set_type((int) Z_LVAL_P(ztype));
+    donkeyid_set_type(type);
 
-    __uint64_t *idlist = malloc(sizeof(__uint64_t)*num);
+    __uint64_t *idlist = (__uint64_t *)malloc(sizeof(__uint64_t)*num);
+
     if (donkeyid_get_id_by_time(idlist,time,num) != 0){
         RETURN_FALSE;
     }
