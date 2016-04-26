@@ -48,10 +48,31 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 */
 /* }}} */
+//类方法参数定义
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid__construct, 0, 0, 0)
                 ZEND_ARG_INFO(0, type)
                 ZEND_ARG_INFO(0, epoch)
 ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_getIdByTime, 0, 0, 0)
+                ZEND_ARG_INFO(0, time)
+                ZEND_ARG_INFO(0, num)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseTime, 0, 0, 0)
+                ZEND_ARG_INFO(0, id)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseNodeId, 0, 0, 0)
+                ZEND_ARG_INFO(0, id)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseWorkerId, 0, 0, 0)
+                ZEND_ARG_INFO(0, id)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseSequence, 0, 0, 0)
+                ZEND_ARG_INFO(0, id)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_setNodeId, 0, 0, 0)
+                ZEND_ARG_INFO(0, node_id)
+ZEND_END_ARG_INFO()
+
 /* Remove the following function when you have successfully modified config.m4
    so that your module can be compiled into PHP, it exists only for testing
    purposes. */
@@ -63,12 +84,12 @@ const zend_function_entry donkeyid__methods[] = {
         PHP_ME(PHP_DONKEYID_CLASS_NAME, __construct, arginfo_donkeyid__construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, __destruct, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, getNextId, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, getIdByTime, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseWorkerId, NULL, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseSequence, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, getIdByTime, arginfo_donkeyid_getIdByTime, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, arginfo_donkeyid_parseTime, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, arginfo_donkeyid_parseNodeId, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, arginfo_donkeyid_setNodeId, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseWorkerId, arginfo_donkeyid_parseWorkerId, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseSequence, arginfo_donkeyid_parseSequence, ZEND_ACC_PUBLIC)
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
 };
 /* }}} */
