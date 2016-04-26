@@ -63,6 +63,7 @@ const zend_function_entry donkeyid__methods[] = {
         PHP_ME(PHP_DONKEYID_CLASS_NAME, __construct, arginfo_donkeyid__construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, __destruct, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, getNextId, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, getIdByTime, NULL, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, NULL, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, NULL, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, NULL, ZEND_ACC_PUBLIC)
@@ -201,7 +202,6 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     if (type < 0 && type > 1) {
         type = 0;
     }
-
     zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("type"), type TSRMLS_CC);
 
     if (val_len <= 0 || val_len >= 19) {
@@ -230,6 +230,9 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, setNodeId) {
     if (nodeid < 0 && nodeid > 255) {
         RETURN_FALSE;
     }
+    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    donkeyid_set_type((int) Z_LVAL_P(ztype));
+
     donkeyid_set_node_id((int) nodeid);
     RETURN_TRUE;
 }
@@ -245,6 +248,41 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {
     len = sprintf(buffer, "%"PRIu64, donkeyid);
 
     DK_RETURN_STRINGL(buffer, len, 1);
+}
+
+ZEND_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime) {
+
+    char buffer[64];
+    int len;
+    char *val = NULL;
+    zend_size_t val_len;
+    int num;
+    int n;
+    //获取类方法的参数
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "sl", &val, &val_len,&num) == FAILURE) {
+        return;
+    }
+    uint64_t time = strtoul(val, NULL, 10);
+    if (time == 0) {
+        RETURN_FALSE;
+    }
+    if (num >= MAX_BATCH_ID_LEN){
+        num = MAX_BATCH_ID_LEN;
+    }
+
+    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
+    donkeyid_set_type((int) Z_LVAL_P(ztype));
+
+    __uint64_t *idlist = malloc(sizeof(__uint64_t)*num);
+    if (donkeyid_get_id_by_time(idlist,time,num) != 0){
+        RETURN_FALSE;
+    }
+    array_init(return_value);
+    for (n = 0; n < num ; n++) {
+        len = sprintf(buffer, "%"PRIu64, *(idlist+n));
+        add_next_index_string(return_value,buffer,len);
+    }
+    free(idlist);
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {

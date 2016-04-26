@@ -53,14 +53,14 @@ int donkeyid_init(int _isshm) {
         if (!ctxaddr) {
             return -1;
         }
-        memset(ctxaddr, 0, sizeof(dtypes));
+        bzero(ctxaddr, sizeof(dtypes));
         lock = (mlocks *) ctxaddr;
     } else {
         shmctx.size = sizeof(dtypes);
         if (shm_alloc(&shmctx) == -1) {
             return -1;
         }
-        memset(shmctx.addr, 0, sizeof(dtypes));
+        bzero(shmctx.addr, sizeof(dtypes));
         lock = (mlocks *) shmctx.addr;
     }
 
@@ -247,4 +247,53 @@ __uint64_t donkeyid_next_id() {
     unlock_end:
     spin_unlock(&((lock+dtype)->lock), pid);
     return id;
+}
+
+/**
+ * 批量获取1秒内的id
+ */
+int donkeyid_get_id_by_time(__uint64_t  *list,__time_t time,int sum)
+{
+    //时间不能小于0，不能小于起始纪元
+    if (time < 0 || (time*1000) < (lock+dtype)->donkeyid_context.epoch){
+        return -1;
+    }
+    //单次获取数量不能超过上限
+    if (sum >= MAX_BATCH_ID_LEN){
+        return -1;
+    }
+    int msec,sequence;
+    int n=0, max_sequence = MAX_BATCH_ID_LEN/1000;
+    switch (dtype) {
+        //生成10进制基地的自增id
+        case 1: {
+            for (msec = 0; msec < 1000; msec++) {
+                for (sequence = 0;sequence<max_sequence;sequence++){
+                    if (n > sum){ break;}
+                    *(list+n) = ((__uint64_t) ((((time*1000+msec)  - ((lock+dtype)->donkeyid_context.epoch != 0?(lock+dtype)->donkeyid_context.epoch/1000:0))) & 0xFFFFFFFF) * TYPE_1_TIMESTAMP)
+                                +((__uint64_t)((lock+dtype)->donkeyid_context.node_id & 0xFF) * 1000000)
+                                +((__uint64_t)sequence * 10);
+                    n++;
+                }
+            }
+            break;
+        }
+        //默认类型
+        case 0:
+        default: {
+            for (msec = 0; msec < 1000; msec++) {
+                for (sequence = 0;sequence<max_sequence;sequence++){
+                    if (n > sum){ break;}
+                    *(list+n) = ((__uint64_t) (((time*1000+msec) - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+                                | ((__uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
+                                | ((__uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
+                                | ((__uint64_t) sequence);
+                    n++;
+                }
+            }
+            break;
+        }
+    }
+    return 0;
+
 }

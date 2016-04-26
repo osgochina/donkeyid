@@ -51,6 +51,10 @@ typedef struct {
     int sequence;               //单服务器毫秒内的自增值
 } donkeyid_context_t;
 
+//批量获取id时最大能够获取的数量
+#define MAX_BATCH_ID_LEN ((1<<WORKER_ID_LEFT_SHIFT)*1000)
+
+
 int donkeyid_init(int);
 
 void donkeyid_set_type(int);
@@ -67,5 +71,6 @@ void donkeyid_set_worker_id();
 
 __uint64_t donkeyid_next_id();
 
+int donkeyid_get_id_by_time(__uint64_t  *,__time_t,int);//批量获取1秒内的id
 
 #endif //DONKEYID_DONKEYID_H

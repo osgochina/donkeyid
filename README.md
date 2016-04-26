@@ -42,6 +42,7 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 * int parseNodeId($id);
 * int parseWorkerId($id);
 * int parseSequence($id);
+* array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<512000
 
 ####测试代码
 
@@ -60,6 +61,8 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
     echo "node=".$node."\n";
     echo "workerid=".$worker_id."\n";
     echo "sequence=".$sequence."\n";
+    $array = $donkey->getIdByTime(1460719318,1);
+    print_r($array);
    
 ```
 #### 支持版本
