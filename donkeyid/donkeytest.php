@@ -1,7 +1,7 @@
 <?php
 
 
-    $donkey = new DonkeyId(0,"1460710318");
+    $donkey = new DonkeyId();
     $donkey->setNodeId(10);
 
     $id = $donkey->getNextId();
@@ -15,6 +15,6 @@
     echo "workerid=".$worker_id."\n";
     echo "sequence=".$sequence."\n";
 
-    $array = $donkey->getIdByTime(1460719318,101);
+    $array = $donkey->getIdByTime(1,10000);
     print_r($array);
 

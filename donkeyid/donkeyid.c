@@ -289,7 +289,7 @@ ZEND_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime) {
     int len;
     char *val = NULL;
     zend_size_t val_len;
-    int num;
+    long num;
     int n;
     //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "sl", &val, &val_len,&num) == FAILURE) {
@@ -326,7 +326,7 @@ ZEND_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime) {
     array_init(return_value);
     for (n = 0; n < num ; n++) {
         len = sprintf(buffer, "%"PRIu64, *(idlist+n));
-        add_next_index_string(return_value,buffer,len);
+        dk_add_next_index_stringl(return_value,buffer,len,1);
     }
     free(idlist);
 }
