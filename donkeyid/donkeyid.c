@@ -39,6 +39,19 @@ ZEND_DECLARE_MODULE_GLOBALS(donkeyid)
 /* True global resources - no need for thread safety here */
 static int le_donkeyid;
 
+static int dk_node_id;
+static PHP_INI_MH(OnSettingNodeId) /* {{{ */ {
+    if (new_value_length == 0) {
+        return FAILURE;
+    }
+
+    dk_node_id = atoi(new_value);
+    if (dk_node_id < 0) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
 /* {{{ PHP_INI
  */
 /* Remove comments and fill if you need to have entries in php.ini
@@ -47,6 +60,12 @@ PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("donkeyid.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_donkeyid_globals, donkeyid_globals)
 PHP_INI_END()
 */
+/* }}} */
+/* {{{ PHP_INI
+ */
+PHP_INI_BEGIN()
+    ZEND_INI_ENTRY("donkeyid.node_id", "0", PHP_INI_SYSTEM, OnSettingNodeId)
+PHP_INI_END()
 /* }}} */
 //类方法参数定义
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid__construct, 0, 0, 0)
@@ -139,8 +158,9 @@ zend_class_entry *donkeyid_ce;
  */
 PHP_MINIT_FUNCTION (donkeyid) {
     /* If you have INI entries, uncomment these lines
+     * */
     REGISTER_INI_ENTRIES();
-    */
+
     zend_class_entry donkeyid_class_entry;
     INIT_CLASS_ENTRY(donkeyid_class_entry, PHP_DONKEYID_CLASS_NAME, donkeyid__methods);
     donkeyid_ce = zend_register_internal_class(&donkeyid_class_entry TSRMLS_CC);
@@ -156,8 +176,9 @@ PHP_MINIT_FUNCTION (donkeyid) {
  */
 PHP_MSHUTDOWN_FUNCTION (donkeyid) {
     /* uncomment this line if you have INI entries
+     * */
     UNREGISTER_INI_ENTRIES();
-    */
+
     donkeyid_shutdown();
     return SUCCESS;
 }
@@ -235,6 +256,20 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     }
     donkeyid_set_epoch(epoch);
     zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("epoch"), epoch TSRMLS_CC);
+    if (type == 0){
+        if (dk_node_id >= NODE_ID_MASK) {
+            dk_node_id = NODE_ID_MASK;
+        } else if(dk_node_id <= 0){
+            dk_node_id = 0;
+        }
+    } else if(type == 1){
+        if (dk_node_id >= TYPE_1_NODE_ID_MASK) {
+            dk_node_id = TYPE_1_NODE_ID_MASK;
+        } else if(dk_node_id <= 0){
+            dk_node_id = 0;
+        }
+    }
+    donkeyid_set_node_id((int) dk_node_id);
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __destruct) {

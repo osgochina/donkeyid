@@ -37,6 +37,11 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
      最后一位是留给业务方的自定义位数。
 
 ###运行
+#### 配置
+> 在php.ini 中配置节点id
+> donkeyid.node_id=11
+> 也可以运行时配置，这样会覆盖php.ini中的配置
+
 ####api接口
 
 * new DonkeyId($type=0,$epoch=0);//$type 类型 值有0,1 epoch 纪元开始时间戳 可以设置从此开始计算秒数
@@ -53,7 +58,7 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 ```php
 
     $donkey = new DonkeyId();
-    $donkey->setNodeId(11); //0-511 不要超过这个值
+    $donkey->setNodeId(11); //0-255 不要超过这个值
     $id = $donkey->getNextId();
     $time = $donkey->parseTime($id);  //返回的是1970-1-1 00:00:00 到生成事件的毫秒数
     $node = $donkey->parseNodeId($id); //返回生成这个id的节点号

@@ -2,7 +2,7 @@
 
 
     $donkey = new DonkeyId();
-    $donkey->setNodeId(10);
+    //$donkey->setNodeId(10);
 
     $id = $donkey->getNextId();
     $time = $donkey->parseTime($id);
@@ -15,6 +15,6 @@
     echo "workerid=".$worker_id."\n";
     echo "sequence=".$sequence."\n";
 
-    $array = $donkey->getIdByTime(1,10000);
-    print_r($array);
+   // $array = $donkey->getIdByTime(1,10000);
+   // print_r($array);
 
