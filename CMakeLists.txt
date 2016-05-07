@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 project(donkeyid)
 
-#set(PHP_INCLUDE_H /usr/local/src/php56/include)
-set(PHP_INCLUDE_H /usr/local/php54/include)
+set(PHP_INCLUDE_H /usr/local/src/php56/include)
+#set(PHP_INCLUDE_H /usr/local/php54/include)
 #set(PHP_INCLUDE_H /usr/local/php7/include)
 INCLUDE_DIRECTORIES(
         /usr/local/include
@@ -13,8 +13,8 @@ INCLUDE_DIRECTORIES(
 
 )
 #AUX_SOURCE_DIRECTORY( /home/vic/workspace/php7/Zend DIR_SRCS)
-AUX_SOURCE_DIRECTORY( /home/vic/workspace/php/Zend DIR_SRCS)
-#AUX_SOURCE_DIRECTORY( /home/vic/workspace/php-5.6.14/Zend DIR_SRCS)
+#AUX_SOURCE_DIRECTORY( /home/vic/workspace/php/Zend DIR_SRCS)
+AUX_SOURCE_DIRECTORY( /home/vic/workspace/php-5.6.14/Zend DIR_SRCS)
 
 
 add_custom_target(makefile COMMAND phpize --clean && phpize && ./configure && make && make install  WORKING_DIRECTORY .)

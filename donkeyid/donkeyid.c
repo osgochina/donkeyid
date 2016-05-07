@@ -229,7 +229,7 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
         val = "0";
     }
     //设置纪元
-    __time_t epoch = strtoul(val, NULL, 10);
+    time_t epoch = strtoul(val, NULL, 10);
     if (epoch < 0 && epoch >= get_curr_timestamp()) {
         epoch = 0LLU;
     }
@@ -318,7 +318,7 @@ ZEND_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime) {
 
     donkeyid_set_type(type);
 
-    __uint64_t *idlist = (__uint64_t *)malloc(sizeof(__uint64_t)*num);
+    uint64_t *idlist = (uint64_t *)malloc(sizeof(uint64_t)*num);
 
     if (donkeyid_get_id_by_time(idlist,time,num) != 0){
         RETURN_FALSE;

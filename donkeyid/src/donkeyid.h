@@ -19,7 +19,8 @@
 #ifndef DONKEYID_DONKEYID_H
 #define DONKEYID_DONKEYID_H
 
-#include <bits/types.h>
+#include <time.h>
+#include <stdint.h>
 
 #define TIMESTAMP_BITS 42   //时间所占bit位数
 #define NODE_ID_BITS 8      //节点所占bit位数
@@ -41,15 +42,15 @@
 #define TYPE_1_NODE_ID_MASK 0x3e7
 #define TYPE_1_SEQUENCE_MASK 0x270f
 
-#define GET_TIMESTAMP_BY_DONKEY_ID(id,type,epoch) (type==0)?((__uint64_t)(id>>TIMESTAMP_LEFT_SHIFT)+(epoch*1000)):(__uint64_t)((id+epoch*TYPE_1_TIMESTAMP)/TYPE_1_TIMESTAMP)
+#define GET_TIMESTAMP_BY_DONKEY_ID(id,type,epoch) (type==0)?((uint64_t)(id>>TIMESTAMP_LEFT_SHIFT)+(epoch*1000)):(uint64_t)((id+epoch*TYPE_1_TIMESTAMP)/TYPE_1_TIMESTAMP)
 #define GET_NODE_ID_BY_DONKEY_ID(id,type)  (type==0)?(int)((id>>NODE_ID_LEFT_SHIFT)&NODE_ID_MASK):(int)((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))/TYPE_1_NODE_ID)
 #define GET_WORKER_ID_BY_DONKEY_ID(id,type) (type==0)?(int)((id>>WORKER_ID_LEFT_SHIFT)&WORKER_ID_MASK):0
 #define GET_SEQUENCE_BY_DONKEY_ID(id,type) (type==0)?(int)(id&SEQUENCE_MASK):(int)((((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))-(GET_NODE_ID_BY_DONKEY_ID(id,type)*TYPE_1_NODE_ID)))/10)
 
 
 typedef struct {
-    __uint64_t epoch; //自定义起始时间
-    __uint64_t last_timestamp; //最后使用毫秒数
+    uint64_t epoch; //自定义起始时间
+    uint64_t last_timestamp; //最后使用毫秒数
     int node_id;                //节点ID
     int sequence;               //单服务器毫秒内的自增值
 } donkeyid_context_t;
@@ -65,15 +66,15 @@ void donkeyid_set_type(int);
 void donkeyid_shutdown();
 
 
-void donkeyid_set_epoch(__time_t);
-__uint64_t get_curr_timestamp();
+void donkeyid_set_epoch(time_t);
+uint64_t get_curr_timestamp();
 
 void donkeyid_set_node_id(int);
 
 void donkeyid_set_worker_id();
 
-__uint64_t donkeyid_next_id();
+uint64_t donkeyid_next_id();
 
-int donkeyid_get_id_by_time(__uint64_t  *,__time_t,int);//批量获取1秒内的id
+int donkeyid_get_id_by_time(uint64_t  *,time_t,int);//批量获取1秒内的id
 
 #endif //DONKEYID_DONKEYID_H

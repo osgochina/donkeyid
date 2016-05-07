@@ -26,6 +26,7 @@
 #include "shm.h"
 #include "spinlock.h"
 
+
 int ncpu;
 static struct shm shmctx;
 static char *ctxaddr;
@@ -108,12 +109,12 @@ void donkeyid_set_type(int type) {
 /**
  * 设置时间戳计算时间
  */
-void donkeyid_set_epoch(__time_t timestamp) {
+void donkeyid_set_epoch(time_t timestamp) {
     if (timestamp <= 0) {
         timestamp = 0;
     }
     spin_lock(&((lock+dtype)->lock),pid);
-    (lock+dtype)->donkeyid_context.epoch = (__uint64_t) ((timestamp & 0xFFFFFFFF) * 1000);
+    (lock+dtype)->donkeyid_context.epoch = (uint64_t) ((timestamp & 0xFFFFFFFF) * 1000);
     spin_unlock(&((lock+dtype)->lock),pid);
 }
 
@@ -144,40 +145,40 @@ void donkeyid_set_worker_id() {
 /**
  * 获取当前毫秒数
  */
-static __uint64_t get_curr_timestamp_ms() {
+static uint64_t get_curr_timestamp_ms() {
     struct timeval tv;
     if (gettimeofday(&tv, NULL) == -1) {
         return 0ULL;
     }
-    __uint64_t ms_t = (__uint64_t) tv.tv_sec * 1000ULL + (__uint64_t) tv.tv_usec / 1000ULL;
+    uint64_t ms_t = (uint64_t) tv.tv_sec * 1000ULL + (uint64_t) tv.tv_usec / 1000ULL;
     return ms_t;
 }
 /**
  * 获取当前秒数
  */
-__uint64_t get_curr_timestamp(){
+uint64_t get_curr_timestamp(){
     struct timeval tv;
     if (gettimeofday(&tv, NULL) == -1) {
         return 0ULL;
     }
-    return  (__uint64_t) tv.tv_sec;
+    return  (uint64_t) tv.tv_sec;
 }
 
 /**
  * 等待1毫秒
  */
-static __uint64_t wait_next_ms() {
+static uint64_t wait_next_ms() {
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 1000;
     select(0, NULL, NULL, NULL, &tv);
     return get_curr_timestamp_ms();
 }
-static __uint64_t wait_next_stamp(__uint64_t now) {
+static uint64_t wait_next_stamp(uint64_t now) {
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 1000;
-    __uint64_t  cur = 0;
+    uint64_t  cur = 0;
     do{
         cur = get_curr_timestamp();
         select(0, NULL, NULL, NULL, &tv);
@@ -189,14 +190,14 @@ static __uint64_t wait_next_stamp(__uint64_t now) {
 /**
  * 获取唯一id
  */
-__uint64_t donkeyid_next_id() {
-    __uint64_t id;
+uint64_t donkeyid_next_id() {
+    uint64_t id;
     spin_lock(&((lock+dtype)->lock), pid);
     //根据不同的类型，生成不同类型的id
     switch (dtype) {
         //生成10进制基地的自增id
         case 1: {
-            __uint64_t now = get_curr_timestamp();
+            uint64_t now = get_curr_timestamp();
             if (now == 0ULL) {
                 id =  0ULL;
                 goto unlock_end;
@@ -215,15 +216,15 @@ __uint64_t donkeyid_next_id() {
                 (lock+dtype)->donkeyid_context.sequence = rand() % 10;
             }
             (lock+dtype)->donkeyid_context.last_timestamp = now;
-            id = ((__uint64_t) (((now - ((lock+dtype)->donkeyid_context.epoch != 0?(lock+dtype)->donkeyid_context.epoch/1000:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
-                 +((__uint64_t)((lock+dtype)->donkeyid_context.node_id & TYPE_1_NODE_ID_MASK) * TYPE_1_NODE_ID)
-                 +((__uint64_t)(lock+dtype)->donkeyid_context.sequence * 10);
+            id = ((uint64_t) (((now - ((lock+dtype)->donkeyid_context.epoch != 0?(lock+dtype)->donkeyid_context.epoch/1000:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
+                 +((uint64_t)((lock+dtype)->donkeyid_context.node_id & TYPE_1_NODE_ID_MASK) * TYPE_1_NODE_ID)
+                 +((uint64_t)(lock+dtype)->donkeyid_context.sequence * 10);
             break;
         }
         //默认类型
         case 0:
         default: {
-            __uint64_t now = get_curr_timestamp_ms();
+            uint64_t now = get_curr_timestamp_ms();
             if (now == 0ULL) {
                 id =  0ULL;
                 goto unlock_end;
@@ -242,10 +243,10 @@ __uint64_t donkeyid_next_id() {
                 (lock+dtype)->donkeyid_context.sequence = rand() % 2;
             }
             (lock+dtype)->donkeyid_context.last_timestamp = now;
-            id = ((__uint64_t) ((now - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
-                 | ((__uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
-                 | ((__uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
-                 | ((__uint64_t) (lock+dtype)->donkeyid_context.sequence);
+            id = ((uint64_t) ((now - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+                 | ((uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
+                 | ((uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
+                 | ((uint64_t) (lock+dtype)->donkeyid_context.sequence);
             break;
         }
     }
@@ -257,7 +258,7 @@ __uint64_t donkeyid_next_id() {
 /**
  * 批量获取1秒内的id
  */
-int donkeyid_get_id_by_time(__uint64_t  *list,__time_t time,int sum)
+int donkeyid_get_id_by_time(uint64_t  *list,time_t time,int sum)
 {
     //时间不能小于0，不能小于起始纪元
     if (time < 0 || (time*1000) < (lock+dtype)->donkeyid_context.epoch){
@@ -276,9 +277,9 @@ int donkeyid_get_id_by_time(__uint64_t  *list,__time_t time,int sum)
             int max_sequence = TYPE_1_SEQUENCE_MASK;
             for (sequence = 0;sequence<max_sequence;sequence++){
                 if (n >= sum){ break;}
-                *(list+n) = ((__uint64_t) ((((time)  - ((lock+dtype)->donkeyid_context.epoch != 0?(lock+dtype)->donkeyid_context.epoch/1000:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
-                            +((__uint64_t)((lock+dtype)->donkeyid_context.node_id & TYPE_1_NODE_ID_MASK) * TYPE_1_NODE_ID)
-                            +((__uint64_t)sequence * 10);
+                *(list+n) = ((uint64_t) ((((time)  - ((lock+dtype)->donkeyid_context.epoch != 0?(lock+dtype)->donkeyid_context.epoch/1000:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
+                            +((uint64_t)((lock+dtype)->donkeyid_context.node_id & TYPE_1_NODE_ID_MASK) * TYPE_1_NODE_ID)
+                            +((uint64_t)sequence * 10);
                 n++;
             }
             break;
@@ -294,10 +295,10 @@ int donkeyid_get_id_by_time(__uint64_t  *list,__time_t time,int sum)
             for (msec = 0; msec < 1000; msec++) {
                 for (sequence = 0;sequence<max_sequence;sequence++){
                     if (n >= sum){ break;}
-                    *(list+n) = ((__uint64_t) (((time*1000+msec) - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
-                                | ((__uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
-                                | ((__uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
-                                | ((__uint64_t) sequence);
+                    *(list+n) = ((uint64_t) (((time*1000+msec) - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+                                | ((uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
+                                | ((uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
+                                | ((uint64_t) sequence);
                     n++;
                 }
             }
