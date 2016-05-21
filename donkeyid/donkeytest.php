@@ -10,6 +10,7 @@
     $sequence = $donkey->parseSequence($id);
 
     echo "id=".$id."\n";
+    echo "time=".$time."\n";
     echo "node=".$node."\n";
     echo "sequence=".$sequence."\n";
 

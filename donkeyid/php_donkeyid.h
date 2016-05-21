@@ -69,6 +69,7 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence);
 */
 ZEND_BEGIN_MODULE_GLOBALS(donkeyid)
 	long  dk_node_id;
+	long  dk_epoch;
 ZEND_END_MODULE_GLOBALS(donkeyid)
 
 

@@ -40,6 +40,7 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 #### 配置
 > 在php.ini 中配置节点id
 > donkeyid.node_id=11
+> donkeyid.epoch=1463803657 起始时间
 > 也可以运行时配置，这样会覆盖php.ini中的配置
 
 ####api接口

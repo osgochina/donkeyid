@@ -53,6 +53,7 @@ PHP_INI_END()
  */
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("donkeyid.node_id", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_node_id,zend_donkeyid_globals,donkeyid_globals)
+    STD_PHP_INI_ENTRY("donkeyid.epoch", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_epoch,zend_donkeyid_globals,donkeyid_globals)
 PHP_INI_END()
 /* }}} */
 //类方法参数定义
@@ -218,7 +219,7 @@ PHP_MINFO_FUNCTION (donkeyid) {
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     long type = 0;
     char *val = 0;
-    zend_size_t val_len;
+    zend_size_t val_len = 0;
     //获取类方法的参数
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "|ls", &type, &val, &val_len) == FAILURE) {
         RETURN_FALSE;
@@ -228,14 +229,15 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
         type = 0;
     }
     zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("type"), type TSRMLS_CC);
-
-    if (val_len <= 0 || val_len >= 19) {
-        val = "0";
-    }
-    //设置纪元
-    time_t epoch = strtoul(val, NULL, 10);
-    if (epoch < 0 && epoch >= get_curr_timestamp()) {
-        epoch = 0LLU;
+    time_t epoch;
+    if(val_len == 0 || val_len >= 19){
+        epoch = (time_t)DONKEYID_G(dk_epoch);
+    }else{
+        //设置纪元
+        epoch = strtoul(val, NULL, 10);
+        if (epoch < 0 && epoch >= get_curr_timestamp()) {
+            epoch = 0LLU;
+        }
     }
     donkeyid_set_epoch(epoch);
     zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("epoch"), epoch TSRMLS_CC);
