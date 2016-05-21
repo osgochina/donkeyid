@@ -33,25 +33,13 @@
 
 
 /* If you declare any globals in php_donkeyid.h uncomment this:
+ *
+ * */
 ZEND_DECLARE_MODULE_GLOBALS(donkeyid)
-*/
+
 
 /* True global resources - no need for thread safety here */
 static int le_donkeyid;
-
-static int dk_node_id;
-static PHP_INI_MH(OnSettingNodeId) /* {{{ */ {
-    if (new_value_length == 0) {
-        return FAILURE;
-    }
-
-    dk_node_id = atoi(new_value);
-    if (dk_node_id < 0) {
-        return FAILURE;
-    }
-
-    return SUCCESS;
-}
 /* {{{ PHP_INI
  */
 /* Remove comments and fill if you need to have entries in php.ini
@@ -64,7 +52,7 @@ PHP_INI_END()
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    ZEND_INI_ENTRY("donkeyid.node_id", "0", PHP_INI_SYSTEM, OnSettingNodeId)
+    STD_PHP_INI_ENTRY("donkeyid.node_id", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_node_id,zend_donkeyid_globals,donkeyid_globals)
 PHP_INI_END()
 /* }}} */
 //类方法参数定义
@@ -257,19 +245,19 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     donkeyid_set_epoch(epoch);
     zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("epoch"), epoch TSRMLS_CC);
     if (type == 0){
-        if (dk_node_id >= NODE_ID_MASK) {
-            dk_node_id = NODE_ID_MASK;
-        } else if(dk_node_id <= 0){
-            dk_node_id = 0;
+        if (DONKEYID_G(dk_node_id) >= NODE_ID_MASK) {
+            DONKEYID_G(dk_node_id)  = NODE_ID_MASK;
+        } else if(DONKEYID_G(dk_node_id)  <= 0){
+            DONKEYID_G(dk_node_id)  = 0;
         }
     } else if(type == 1){
-        if (dk_node_id >= TYPE_1_NODE_ID_MASK) {
-            dk_node_id = TYPE_1_NODE_ID_MASK;
-        } else if(dk_node_id <= 0){
-            dk_node_id = 0;
+        if (DONKEYID_G(dk_node_id)  >= TYPE_1_NODE_ID_MASK) {
+            DONKEYID_G(dk_node_id)  = TYPE_1_NODE_ID_MASK;
+        } else if(DONKEYID_G(dk_node_id)  <= 0){
+            DONKEYID_G(dk_node_id)  = 0;
         }
     }
-    donkeyid_set_node_id((int) dk_node_id);
+    donkeyid_set_node_id((int) DONKEYID_G(dk_node_id) );
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __destruct) {

@@ -67,12 +67,11 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence);
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
-
-ZEND_BEGIN_MODULE_GLOBALS(donkeyid)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(donkeyid)
 */
+ZEND_BEGIN_MODULE_GLOBALS(donkeyid)
+	long  dk_node_id;
+ZEND_END_MODULE_GLOBALS(donkeyid)
+
 
 /* In every utility function you add that needs to use variables 
    in php_donkeyid_globals, call TSRMLS_FETCH(); after declaring other 
