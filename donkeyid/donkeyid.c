@@ -70,9 +70,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseNodeId, 0, 0, 0)
                 ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseWorkerId, 0, 0, 0)
-                ZEND_ARG_INFO(0, id)
-ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseSequence, 0, 0, 0)
                 ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
@@ -95,7 +92,6 @@ const zend_function_entry donkeyid__methods[] = {
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, arginfo_donkeyid_parseTime, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, arginfo_donkeyid_parseNodeId, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, arginfo_donkeyid_setNodeId, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseWorkerId, arginfo_donkeyid_parseWorkerId, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseSequence, arginfo_donkeyid_parseSequence, ZEND_ACC_PUBLIC)
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
 };
@@ -176,7 +172,6 @@ PHP_MSHUTDOWN_FUNCTION (donkeyid) {
 /* {{{ PHP_RINIT_FUNCTION
  */
 PHP_RINIT_FUNCTION (donkeyid) {
-    donkeyid_set_worker_id();
     return SUCCESS;
 }
 /* }}} */
@@ -391,22 +386,6 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId) {
     RETURN_LONG(nodeid);
 }
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseWorkerId) {
-    char *val = NULL;
-    zend_size_t val_len;
-
-//获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
-        return;
-    }
-    uint64_t id = strtoul(val, NULL, 10);
-    if (id == 0) {
-        RETURN_FALSE;
-    }
-    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
-    int workerid = GET_WORKER_ID_BY_DONKEY_ID(id, Z_LVAL_P(ztype));
-    RETURN_LONG(workerid);
-}
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence) {
     char *val = NULL;

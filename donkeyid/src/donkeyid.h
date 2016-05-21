@@ -23,18 +23,15 @@
 #include <stdint.h>
 
 #define TIMESTAMP_BITS 42   //时间所占bit位数
-#define NODE_ID_BITS 8      //节点所占bit位数
-#define WORKER_ID_BITS 5    //进程worker所占bit位数
-#define SEQUENCE_BITS 9     //毫秒内自增
+#define NODE_ID_BITS 12      //节点所占bit位数
+#define SEQUENCE_BITS 10     //毫秒内自增
 
 #define TIMESTAMP_MASK (-1LL^(-1LL<<TIMESTAMP_BITS))
 #define NODE_ID_MASK (-1^(-1<<NODE_ID_BITS))
-#define WORKER_ID_MASK (-1^(-1<<WORKER_ID_BITS))
 #define SEQUENCE_MASK (-1^(-1<<SEQUENCE_BITS))
 
-#define TIMESTAMP_LEFT_SHIFT (NODE_ID_BITS+WORKER_ID_BITS+SEQUENCE_BITS)
-#define NODE_ID_LEFT_SHIFT (WORKER_ID_BITS+SEQUENCE_BITS)
-#define WORKER_ID_LEFT_SHIFT (SEQUENCE_BITS)
+#define TIMESTAMP_LEFT_SHIFT (NODE_ID_BITS+SEQUENCE_BITS)
+#define NODE_ID_LEFT_SHIFT (SEQUENCE_BITS)
 
 #define TYPE_1_TIMESTAMP 100000000
 #define TYPE_1_NODE_ID 100000
@@ -44,7 +41,6 @@
 
 #define GET_TIMESTAMP_BY_DONKEY_ID(id,type,epoch) (type==0)?((uint64_t)(id>>TIMESTAMP_LEFT_SHIFT)+(epoch*1000)):(uint64_t)((id+epoch*TYPE_1_TIMESTAMP)/TYPE_1_TIMESTAMP)
 #define GET_NODE_ID_BY_DONKEY_ID(id,type)  (type==0)?(int)((id>>NODE_ID_LEFT_SHIFT)&NODE_ID_MASK):(int)((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))/TYPE_1_NODE_ID)
-#define GET_WORKER_ID_BY_DONKEY_ID(id,type) (type==0)?(int)((id>>WORKER_ID_LEFT_SHIFT)&WORKER_ID_MASK):0
 #define GET_SEQUENCE_BY_DONKEY_ID(id,type) (type==0)?(int)(id&SEQUENCE_MASK):(int)((((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))-(GET_NODE_ID_BY_DONKEY_ID(id,type)*TYPE_1_NODE_ID)))/10)
 
 
@@ -56,7 +52,7 @@ typedef struct {
 } donkeyid_context_t;
 
 //批量获取id时最大能够获取的数量
-#define MAX_BATCH_ID_LEN ((1<<WORKER_ID_LEFT_SHIFT)*1000)
+#define MAX_BATCH_ID_LEN ((1<<NODE_ID_LEFT_SHIFT)*1000)
 
 
 int donkeyid_init(int);
@@ -70,8 +66,6 @@ void donkeyid_set_epoch(time_t);
 uint64_t get_curr_timestamp();
 
 void donkeyid_set_node_id(int);
-
-void donkeyid_set_worker_id();
 
 uint64_t donkeyid_next_id();
 

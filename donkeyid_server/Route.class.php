@@ -57,12 +57,10 @@ class Route
                 if ($type == 0) {
                     $d["time"] = $this->donkeyid0->parseTime($id);
                     $d["node_id"] = $this->donkeyid0->parseNodeId($id);
-                    $d["worker_id"] = $this->donkeyid0->parseWorkerId($id);
                     $d["sequence"] = $this->donkeyid0->parseSequence($id);
                 } elseif ($type == 1) {
                     $d["time"] = $this->donkeyid1->parseTime($id);
                     $d["node_id"] = $this->donkeyid1->parseNodeId($id);
-                    $d["worker_id"] = $this->donkeyid1->parseWorkerId($id);
                     $d["sequence"] = $this->donkeyid1->parseSequence($id);
                 }
                 return $this->success($d);

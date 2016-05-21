@@ -7,9 +7,9 @@
 > 如图所示，64bits 咱们分成了4个部分。
 
 > 1. 毫秒级的时间戳,有42个bit.能够使用139年，从1970年开始计算，能使用到2109年，当然这些是可以扩展的,可以通知指定起始时间来延长这个日期长度。
-> 2. 自定义节点id,防止多进程运行产生重复id,能够256个节点。部署的时候可以配置好服务器id;
-> 4. 进程workerid，占位5bit，能够生成32个进程id。根据pid运算获得。
-> 4. 进程内毫秒时间自增序号。一毫秒能产生512个id。也就是说并发1秒能产生512000个id。
+> 2. 自定义节点id,防止多进程运行产生重复id,占位12个bit,能够支持4096个节点。部署的时候可以配置好服务器id;
+> 4. ~~进程workerid，占位5bit，能够生成32个进程id。根据pid运算获得。(已经取消)~~
+> 4. 进程内毫秒时间自增序号。占位10bit,一毫秒能产生1024个id。也就是说并发1秒能产生1024000个id。
 
 ###唯一性保证
 > 100%唯一性保证,根据nodeid的不一样保证多服务器的唯一性，使用共享内存+自旋锁保证单节点多进程的唯一性
@@ -49,7 +49,6 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 * string getNextId();
 * string parseTime($id);
 * int parseNodeId($id);
-* int parseWorkerId($id);
 * int parseSequence($id);
 * array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<512000
 
@@ -62,13 +61,11 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
     $id = $donkey->getNextId();
     $time = $donkey->parseTime($id);  //返回的是1970-1-1 00:00:00 到生成事件的毫秒数
     $node = $donkey->parseNodeId($id); //返回生成这个id的节点号
-    $worker_id = $donkey->parseWorkerId($id); //返回生成id的进程号 不过是被处理过的，最多0-31
     $sequence = $donkey->parseSequence($id);  //返回同一时间内生成的序号
     
     echo "donkeyid=".$id."\n";
     echo "time=".date("Y-m-d H:i:s",$time/1000)."\n";
     echo "node=".$node."\n";
-    echo "workerid=".$worker_id."\n";
     echo "sequence=".$sequence."\n";
     $array = $donkey->getIdByTime(1460719318,1);
     print_r($array);
@@ -118,7 +115,6 @@ http://127.0.0.1:9521/parseId/1/$id //解析10进制相乘类型ID
 "data":{
         "time":"1461674906404", //时间戳
         "node_id":1,            //节点id
-        "worker_id":26,         //进程workerid
         "sequence":0            //自增值
         }
 }

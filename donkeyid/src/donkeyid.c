@@ -31,7 +31,6 @@ int ncpu;
 static struct shm shmctx;
 static char *ctxaddr;
 static int pid = -1;
-static int worker_id = 0;
 static int isshm = 0;
 
 typedef struct {
@@ -130,16 +129,6 @@ void donkeyid_set_node_id(int node_id) {
     }
 
     spin_unlock(&((lock+dtype)->lock),pid);
-}
-
-/**
- * 设置worker_id
- */
-void donkeyid_set_worker_id() {
-    if (pid == -1)
-        pid = (int) getpid();
-    if (worker_id == 0)
-        worker_id = pid & WORKER_ID_MASK;
 }
 
 /**
@@ -245,7 +234,6 @@ uint64_t donkeyid_next_id() {
             (lock+dtype)->donkeyid_context.last_timestamp = now;
             id = ((uint64_t) ((now - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
                  | ((uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
-                 | ((uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
                  | ((uint64_t) (lock+dtype)->donkeyid_context.sequence);
             break;
         }
@@ -297,7 +285,6 @@ int donkeyid_get_id_by_time(uint64_t  *list,time_t time,int sum)
                     if (n >= sum){ break;}
                     *(list+n) = ((uint64_t) (((time*1000+msec) - (lock+dtype)->donkeyid_context.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
                                 | ((uint64_t) ((lock+dtype)->donkeyid_context.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
-                                | ((uint64_t) worker_id << WORKER_ID_LEFT_SHIFT)
                                 | ((uint64_t) sequence);
                     n++;
                 }
