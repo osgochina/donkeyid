@@ -38,9 +38,11 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 
 ###运行
 #### 配置
+
 > 在php.ini 中配置节点id
-> donkeyid.node_id=11
-> donkeyid.epoch=1463803657 起始时间
+* donkeyid.type=0
+* donkeyid.node_id=11
+* donkeyid.epoch=0
 > 也可以运行时配置，这样会覆盖php.ini中的配置
 
 ####api接口
@@ -52,6 +54,7 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 * int parseNodeId($id);
 * int parseSequence($id);
 * array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<512000
+* dk_get_next_id() //直接使用函数获取id,根据php.ini中的配置生成
 
 ####测试代码
 
