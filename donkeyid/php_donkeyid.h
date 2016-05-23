@@ -51,6 +51,7 @@ PHP_RSHUTDOWN_FUNCTION (donkeyid);
 
 PHP_MINFO_FUNCTION (donkeyid);
 
+PHP_FUNCTION(dk_get_next_id);
 
 //class method
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct);
@@ -68,6 +69,7 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence);
 	and END macros here:     
 */
 ZEND_BEGIN_MODULE_GLOBALS(donkeyid)
+	long  dk_type;
 	long  dk_node_id;
 	long  dk_epoch;
 ZEND_END_MODULE_GLOBALS(donkeyid)

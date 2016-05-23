@@ -52,6 +52,7 @@ PHP_INI_END()
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("donkeyid.type", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_type,zend_donkeyid_globals,donkeyid_globals)
     STD_PHP_INI_ENTRY("donkeyid.node_id", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_node_id,zend_donkeyid_globals,donkeyid_globals)
     STD_PHP_INI_ENTRY("donkeyid.epoch", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_epoch,zend_donkeyid_globals,donkeyid_globals)
 PHP_INI_END()
@@ -94,10 +95,10 @@ const zend_function_entry donkeyid__methods[] = {
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, arginfo_donkeyid_parseNodeId, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, arginfo_donkeyid_setNodeId, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseSequence, arginfo_donkeyid_parseSequence, ZEND_ACC_PUBLIC)
+        PHP_FE(dk_get_next_id, NULL)
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
 };
 /* }}} */
-
 /* {{{ donkeyid_module_entry
  */
 zend_module_entry donkeyid_module_entry = {
@@ -152,6 +153,9 @@ PHP_MINIT_FUNCTION (donkeyid) {
     if (donkeyid_init(1) == -1){
         return FAILURE;
     }
+    donkeyid_set_type((int) DONKEYID_G(dk_type));
+    donkeyid_set_epoch((time_t) DONKEYID_G(dk_epoch));
+    donkeyid_set_node_id((int) DONKEYID_G(dk_node_id));
     atexit(donkeyid_shutdown);
     return SUCCESS;
 }
@@ -300,6 +304,15 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {
     uint64_t donkeyid = donkeyid_next_id();
     len = sprintf(buffer, "%"PRIu64, donkeyid);
 
+    DK_RETURN_STRINGL(buffer, len, 1);
+}
+
+PHP_FUNCTION(dk_get_next_id)
+{
+    char buffer[64];
+    int len;
+    uint64_t donkeyid = donkeyid_next_id();
+    len = sprintf(buffer, "%"PRIu64, donkeyid);
     DK_RETURN_STRINGL(buffer, len, 1);
 }
 
