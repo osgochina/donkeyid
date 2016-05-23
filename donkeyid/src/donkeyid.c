@@ -201,7 +201,7 @@ uint64_t donkeyid_next_id() {
                 }
             } else {
                 //使得生成的id尾号均匀
-                srand(now);
+                srand((unsigned int)now);
                 (lock+dtype)->donkeyid_context.sequence = rand() % 10;
             }
             (lock+dtype)->donkeyid_context.last_timestamp = now;
@@ -228,7 +228,7 @@ uint64_t donkeyid_next_id() {
                 }
             } else {
                 //使得生成的id尾号均匀
-                srand(now);
+                srand((unsigned int)now);
                 (lock+dtype)->donkeyid_context.sequence = rand() % 2;
             }
             (lock+dtype)->donkeyid_context.last_timestamp = now;
