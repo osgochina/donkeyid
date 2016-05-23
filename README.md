@@ -40,20 +40,20 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 #### 配置
 
 > 在php.ini 中配置节点id
+* [DonkeyId]
 * donkeyid.type=0
-* donkeyid.node_id=11
+* donkeyid.node_id=21
 * donkeyid.epoch=0
 > 也可以运行时配置，这样会覆盖php.ini中的配置
 
 ####api接口
 
-* new DonkeyId($type=0,$epoch=0);//$type 类型 值有0,1 epoch 纪元开始时间戳 可以设置从此开始计算秒数
-* boolean setNodeId($node_id);
+* new DonkeyId($type=0,$epoch=0,$nodeid=0);//$type 类型 值有0,1 epoch 纪元开始时间戳 可以设置从此开始计算秒数,节点id
 * string getNextId();
 * string parseTime($id);
 * int parseNodeId($id);
 * int parseSequence($id);
-* array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<512000
+* array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<1024000
 * dk_get_next_id() //直接使用函数获取id,根据php.ini中的配置生成
 
 ####测试代码
@@ -61,7 +61,6 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 ```php
 
     $donkey = new DonkeyId();
-    $donkey->setNodeId(11); //0-255 不要超过这个值
     $id = $donkey->getNextId();
     $time = $donkey->parseTime($id);  //返回的是1970-1-1 00:00:00 到生成事件的毫秒数
     $node = $donkey->parseNodeId($id); //返回生成这个id的节点号

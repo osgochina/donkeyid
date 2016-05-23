@@ -61,6 +61,7 @@ PHP_INI_END()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid__construct, 0, 0, 0)
                 ZEND_ARG_INFO(0, type)
                 ZEND_ARG_INFO(0, epoch)
+                ZEND_ARG_INFO(0, node_id)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_getIdByTime, 0, 0, 0)
                 ZEND_ARG_INFO(0, time)
@@ -74,9 +75,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseNodeId, 0, 0, 0)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseSequence, 0, 0, 0)
                 ZEND_ARG_INFO(0, id)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_setNodeId, 0, 0, 0)
-                ZEND_ARG_INFO(0, node_id)
 ZEND_END_ARG_INFO()
 
 /* Remove the following function when you have successfully modified config.m4
@@ -93,7 +91,6 @@ const zend_function_entry donkeyid__methods[] = {
         PHP_ME(PHP_DONKEYID_CLASS_NAME, getIdByTime, arginfo_donkeyid_getIdByTime, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, arginfo_donkeyid_parseTime, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, arginfo_donkeyid_parseNodeId, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, setNodeId, arginfo_donkeyid_setNodeId, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, parseSequence, arginfo_donkeyid_parseSequence, ZEND_ACC_PUBLIC)
         PHP_FE(dk_get_next_id, NULL)
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
@@ -122,7 +119,22 @@ ZEND_GET_MODULE(donkeyid)
 
 
 /* }}} */
-
+static long check_node_id(long type,long nodeid) {
+    if (type == 0){
+        if (nodeid >= NODE_ID_MASK) {
+            return  NODE_ID_MASK;
+        } else if(nodeid  <= 0){
+            return  0;
+        }
+    } else if(type == 1){
+        if (nodeid  >= TYPE_1_NODE_ID_MASK) {
+            return TYPE_1_NODE_ID_MASK;
+        } else if(nodeid  <= 0){
+            return  0;
+        }
+    }
+    return nodeid;
+}
 
 
 /* {{{ php_donkeyid_init_globals
@@ -155,7 +167,7 @@ PHP_MINIT_FUNCTION (donkeyid) {
     }
     donkeyid_set_type((int) DONKEYID_G(dk_type));
     donkeyid_set_epoch((time_t) DONKEYID_G(dk_epoch));
-    donkeyid_set_node_id((int) DONKEYID_G(dk_node_id));
+    donkeyid_set_node_id((int) check_node_id(DONKEYID_G(dk_type),DONKEYID_G(dk_node_id)));
     atexit(donkeyid_shutdown);
     return SUCCESS;
 }
@@ -215,6 +227,7 @@ PHP_MINFO_FUNCTION (donkeyid) {
 
 
 
+
 /* The previous line is meant for vim and emacs, so it can correctly fold and
    unfold functions in source code. See the corresponding marks just before
    function definition, where the functions purpose is also documented. Please
@@ -224,8 +237,9 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     long type = 0;
     char *val = 0;
     zend_size_t val_len = 0;
+    long nodeid = -1;
     //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "|ls", &type, &val, &val_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "|lsl", &type, &val, &val_len,&nodeid) == FAILURE) {
         RETURN_FALSE;
     }
     //不是1就是0
@@ -245,53 +259,16 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct) {
     }
     donkeyid_set_epoch(epoch);
     zend_update_property_long(donkeyid_ce, getThis(), ZEND_STRL("epoch"), epoch TSRMLS_CC);
-    if (type == 0){
-        if (DONKEYID_G(dk_node_id) >= NODE_ID_MASK) {
-            DONKEYID_G(dk_node_id)  = NODE_ID_MASK;
-        } else if(DONKEYID_G(dk_node_id)  <= 0){
-            DONKEYID_G(dk_node_id)  = 0;
-        }
-    } else if(type == 1){
-        if (DONKEYID_G(dk_node_id)  >= TYPE_1_NODE_ID_MASK) {
-            DONKEYID_G(dk_node_id)  = TYPE_1_NODE_ID_MASK;
-        } else if(DONKEYID_G(dk_node_id)  <= 0){
-            DONKEYID_G(dk_node_id)  = 0;
-        }
+    if (nodeid == -1){
+        nodeid = check_node_id(type,DONKEYID_G(dk_node_id));
+    } else{
+        nodeid = check_node_id(type,nodeid);
     }
-    donkeyid_set_node_id((int) DONKEYID_G(dk_node_id) );
+    donkeyid_set_node_id((int) nodeid);
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __destruct) {
     return;
-}
-
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, setNodeId) {
-
-    long nodeid;
-    //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "l", &nodeid) == FAILURE) {
-        return;
-    }
-    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
-    int type = (int) Z_LVAL_P(ztype);
-    if (type == 0){
-        if (nodeid >= NODE_ID_MASK) {
-            nodeid = NODE_ID_MASK;
-        } else if(nodeid <= 0){
-            nodeid = 0;
-        }
-    } else if(type == 1){
-        if (nodeid >= TYPE_1_NODE_ID_MASK) {
-            nodeid = TYPE_1_NODE_ID_MASK;
-        } else if(nodeid <= 0){
-            nodeid = 0;
-        }
-    }
-
-    donkeyid_set_type(type);
-
-    donkeyid_set_node_id((int) nodeid);
-    RETURN_TRUE;
 }
 
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {

@@ -19,10 +19,8 @@ class Route
         if($epoch <= 0){
             $epoch = 0;
         }
-        $this->donkeyid0 = new DonkeyId(0,$epoch);
-        $this->donkeyid0->setNodeId($node_id);
-        $this->donkeyid1 = new DonkeyId(1,$epoch);
-        $this->donkeyid1->setNodeId($node_id);
+        $this->donkeyid0 = new DonkeyId(0,$epoch,$node_id);
+        $this->donkeyid1 = new DonkeyId(1,$epoch,$node_id);
     }
 
     public function run($request)
