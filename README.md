@@ -40,10 +40,17 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 #### 配置
 
 > 在php.ini 中配置节点id
-* [DonkeyId]
-* donkeyid.type=0
-* donkeyid.node_id=21
-* donkeyid.epoch=0
+
+```
+[DonkeyId]
+;[0,1]
+donkeyid.type=0
+;0-4095
+donkeyid.node_id=0
+;0-当前时间戳
+donkeyid.epoch=0
+
+```
 > 也可以运行时配置，这样会覆盖php.ini中的配置
 
 ####api接口
