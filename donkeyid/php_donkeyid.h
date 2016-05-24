@@ -52,6 +52,9 @@ PHP_RSHUTDOWN_FUNCTION (donkeyid);
 PHP_MINFO_FUNCTION (donkeyid);
 
 PHP_FUNCTION(dk_get_next_id);
+PHP_FUNCTION(dk_parse_time);
+PHP_FUNCTION(dk_parse_node_id);
+PHP_FUNCTION(dk_parse_sequence);
 
 //class method
 PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct);
