@@ -53,13 +53,9 @@ class Route
                     return $this->error("parameter error!");
                 }
                 if ($type == 0) {
-                    $d["time"] = $this->donkeyid0->parseTime($id);
-                    $d["node_id"] = $this->donkeyid0->parseNodeId($id);
-                    $d["sequence"] = $this->donkeyid0->parseSequence($id);
+                    $d = $this->donkeyid0->parseId($id);
                 } elseif ($type == 1) {
-                    $d["time"] = $this->donkeyid1->parseTime($id);
-                    $d["node_id"] = $this->donkeyid1->parseNodeId($id);
-                    $d["sequence"] = $this->donkeyid1->parseSequence($id);
+                    $d = $this->donkeyid1->parseId($id);
                 }
                 return $this->success($d);
             }

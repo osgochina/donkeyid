@@ -67,13 +67,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_getIdByTime, 0, 0, 0)
                 ZEND_ARG_INFO(0, time)
                 ZEND_ARG_INFO(0, num)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseTime, 0, 0, 0)
-                ZEND_ARG_INFO(0, id)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseNodeId, 0, 0, 0)
-                ZEND_ARG_INFO(0, id)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseSequence, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseId, 0, 0, 0)
                 ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
 
@@ -89,13 +83,9 @@ const zend_function_entry donkeyid__methods[] = {
         PHP_ME(PHP_DONKEYID_CLASS_NAME, __destruct, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_DTOR)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, getNextId, NULL, ZEND_ACC_PUBLIC)
         PHP_ME(PHP_DONKEYID_CLASS_NAME, getIdByTime, arginfo_donkeyid_getIdByTime, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseTime, arginfo_donkeyid_parseTime, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseNodeId, arginfo_donkeyid_parseNodeId, ZEND_ACC_PUBLIC)
-        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseSequence, arginfo_donkeyid_parseSequence, ZEND_ACC_PUBLIC)
+        PHP_ME(PHP_DONKEYID_CLASS_NAME, parseId, arginfo_donkeyid_parseId, ZEND_ACC_PUBLIC)
         PHP_FE(dk_get_next_id, NULL)
-        PHP_FE(dk_parse_time, NULL)
-        PHP_FE(dk_parse_node_id, NULL)
-        PHP_FE(dk_parse_sequence, NULL)
+        PHP_FE(dk_parse_id, NULL)
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
 };
 /* }}} */
@@ -350,7 +340,7 @@ ZEND_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime) {
     free(idlist);
 }
 
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
+PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseId) {
     char *val = NULL;
     zend_size_t val_len;
     char buffer[64];
@@ -363,14 +353,23 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseTime) {
     if (id == 0) {
         RETURN_FALSE;
     }
+
+    array_init(return_value);
+
     zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
     zval *zepoch = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("epoch"), 0 TSRMLS_CC);
     uint64_t time = GET_TIMESTAMP_BY_DONKEY_ID(id, Z_LVAL_P(ztype), Z_LVAL_P(zepoch));
     len = sprintf(buffer, "%"PRIu64, Z_LVAL_P(ztype) == 0 ? time : time * 1000);
-    DK_RETURN_STRINGL(buffer, len, 1);
+    int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, Z_LVAL_P(ztype));
+    int sequence = GET_SEQUENCE_BY_DONKEY_ID(id, Z_LVAL_P(ztype));
+
+    dk_add_assoc_stringl_ex(return_value,"time",5,buffer,(uint)len,1);
+    add_assoc_long_ex(return_value,"node_id",8,nodeid);
+    add_assoc_long_ex(return_value,"sequence",9,sequence);
+
 }
 
-PHP_FUNCTION(dk_parse_time)
+PHP_FUNCTION(dk_parse_id)
 {
     char *val = NULL;
     zend_size_t val_len;
@@ -384,78 +383,16 @@ PHP_FUNCTION(dk_parse_time)
     if (id == 0) {
         RETURN_FALSE;
     }
+    array_init(return_value);
     uint64_t time = GET_TIMESTAMP_BY_DONKEY_ID(id, DONKEYID_G(dk_type), DONKEYID_G(dk_epoch));
     len = sprintf(buffer, "%"PRIu64, DONKEYID_G(dk_type) == 0 ? time : time * 1000);
-    DK_RETURN_STRINGL(buffer, len, 1);
-}
-
-
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseNodeId) {
-    char *val = NULL;
-    zend_size_t val_len;
-
-    //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
-        return;
-    }
-    uint64_t id = strtoul(val, NULL, 10);
-    if (id == 0) {
-        RETURN_FALSE;
-    }
-    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
-    int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, Z_LVAL_P(ztype));
-    RETURN_LONG(nodeid);
-}
-
-PHP_FUNCTION(dk_parse_node_id){
-    char *val = NULL;
-    zend_size_t val_len;
-
-    //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
-        return;
-    }
-    uint64_t id = strtoul(val, NULL, 10);
-    if (id == 0) {
-        RETURN_FALSE;
-    }
-    int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, DONKEYID_G(dk_type));
-    RETURN_LONG(nodeid);
-}
-
-
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseSequence) {
-    char *val = NULL;
-    zend_size_t val_len;
-
-    //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
-        return;
-    }
-    uint64_t id = strtoul(val, NULL, 10);
-    if (id == 0) {
-        RETURN_FALSE;
-    }
-    zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
-    int sequence = GET_SEQUENCE_BY_DONKEY_ID(id, Z_LVAL_P(ztype));
-    RETURN_LONG(sequence);
-}
-
-PHP_FUNCTION(dk_parse_sequence)
-{
-    char *val = NULL;
-    zend_size_t val_len;
-
-    //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
-        return;
-    }
-    uint64_t id = strtoul(val, NULL, 10);
-    if (id == 0) {
-        RETURN_FALSE;
-    }
     int sequence = GET_SEQUENCE_BY_DONKEY_ID(id, DONKEYID_G(dk_type));
-    RETURN_LONG(sequence);
+    int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, DONKEYID_G(dk_type));
+
+    dk_add_assoc_stringl_ex(return_value,"time",5,buffer,(uint)len,1);
+    add_assoc_long_ex(return_value,"node_id",8,nodeid);
+    add_assoc_long_ex(return_value,"sequence",9,sequence);
+
 }
 
 

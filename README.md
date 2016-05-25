@@ -55,30 +55,25 @@ donkeyid.epoch=0
 
 ####api接口
 
-* new DonkeyId($type=0,$epoch=0,$nodeid=0);//$type 类型 值有0,1 epoch 纪元开始时间戳 可以设置从此开始计算秒数,节点id
+* new DonkeyId($type=0,$nodeid=0,$epoch=0);//$type 类型 值有0,1 epoch 纪元开始时间戳 可以设置从此开始计算秒数,节点id
 * string getNextId();
-* string parseTime($id);
-* int parseNodeId($id);
-* int parseSequence($id);
+* array parseId($id);  //返回解析后的数据，包括nodie,time,sequence
 * array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<1024000
-* dk_get_next_id() //直接使用函数获取id,根据php.ini中的配置生成
+* dk_get_next_id(); //直接使用函数获取id,根据php.ini中的配置生成
+* dk_parse_id($id); //返回解析后的数据，包括nodie,time,sequence,跟类的解析区别，这里使用的配置是php.ini中的默认配置
 
 ####测试代码
 
 ```php
 
-    $donkey = new DonkeyId();
-    $id = $donkey->getNextId();
-    $time = $donkey->parseTime($id);  //返回的是1970-1-1 00:00:00 到生成事件的毫秒数
-    $node = $donkey->parseNodeId($id); //返回生成这个id的节点号
-    $sequence = $donkey->parseSequence($id);  //返回同一时间内生成的序号
-    
-    echo "donkeyid=".$id."\n";
-    echo "time=".date("Y-m-d H:i:s",$time/1000)."\n";
-    echo "node=".$node."\n";
-    echo "sequence=".$sequence."\n";
-    $array = $donkey->getIdByTime(1460719318,1);
-    print_r($array);
+    echo "1--id=".($id1 = dk_get_next_id())."\n";
+    print_r(dk_parse_id($id1));
+    echo "\n";
+    $donkey = new DonkeyId(1);
+    $id2 = $donkey->getNextId();
+    echo "2--id=".$id2."\n";
+    print_r($donkey->parseId($id2));
+    echo "\n";
    
 ```
 #### 支持版本

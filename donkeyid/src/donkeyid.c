@@ -165,7 +165,7 @@ uint64_t donkeyid_next_id(dk_p_t pt) {
                 (mlock+pt.dtype)->donkeyid_context.sequence = rand() % 10;
             }
             (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
-            id = ((uint64_t) (((now - (pt.epoch != 0?pt.epoch/1000:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
+            id = ((uint64_t) (((now - (pt.epoch != 0?pt.epoch:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
                  +((uint64_t)(pt.node_id) * TYPE_1_NODE_ID)
                  +((uint64_t)(mlock+pt.dtype)->donkeyid_context.sequence * 10);
             break;
@@ -192,7 +192,7 @@ uint64_t donkeyid_next_id(dk_p_t pt) {
                 (mlock+pt.dtype)->donkeyid_context.sequence = rand() % 2;
             }
             (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
-            id = ((uint64_t) ((now - pt.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+            id = ((uint64_t) ((now - pt.epoch*1000) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
                  | ((uint64_t) (pt.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
                  | ((uint64_t) (mlock+pt.dtype)->donkeyid_context.sequence);
             break;
@@ -228,7 +228,7 @@ int donkeyid_get_id_by_time(uint64_t  *list,time_t time,int sum,dk_p_t pt)
             int max_sequence = TYPE_1_SEQUENCE_MASK;
             for (sequence = 0;sequence<max_sequence;sequence++){
                 if (n >= sum){ break;}
-                *(list+n) = ((uint64_t) ((((time)  - (pt.epoch != 0?pt.epoch/1000:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
+                *(list+n) = ((uint64_t) ((((time)  - (pt.epoch != 0?pt.epoch:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
                             +((uint64_t)(pt.node_id) * TYPE_1_NODE_ID)
                             +((uint64_t)sequence * 10);
                 n++;
@@ -246,7 +246,7 @@ int donkeyid_get_id_by_time(uint64_t  *list,time_t time,int sum,dk_p_t pt)
             for (msec = 0; msec < 1000; msec++) {
                 for (sequence = 0;sequence<max_sequence;sequence++){
                     if (n >= sum){ break;}
-                    *(list+n) = ((uint64_t) (((time*1000+msec) - pt.epoch) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+                    *(list+n) = ((uint64_t) (((time*1000+msec) - pt.epoch*1000) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
                                 | ((uint64_t) (pt.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
                                 | ((uint64_t) sequence);
                     n++;

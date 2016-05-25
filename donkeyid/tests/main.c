@@ -9,32 +9,16 @@
 int main() {
     int type = 1;
     long epoch = 0;
-    donkeyid_init(0);
-    donkeyid_set_worker_id();
-    donkeyid_set_type(type);
-    donkeyid_set_node_id(2);
-    donkeyid_set_epoch(epoch);
-
-//    int i = 0;
-//    for (i = 0; i < 1; ++i) {
-//        __uint64_t donkeyid = donkeyid_next_id();
-//        printf("%"PRIu64"\n", donkeyid);
+    donkeyid_init();
+    dk_p_t pt = {dtype:0,node_id:1,epoch:0};
+    int i = 0;
+    for (i = 0; i < 100; ++i) {
+        __uint64_t donkeyid = donkeyid_next_id(pt);
+        printf("%"PRIu64"\n", donkeyid);
 //        printf("%"PRIu64"\n",GET_TIMESTAMP_BY_DONKEY_ID(donkeyid,type,epoch));
 //        printf("%d\n",GET_NODE_ID_BY_DONKEY_ID(donkeyid,type));
 //        printf("%d\n",GET_WORKER_ID_BY_DONKEY_ID(donkeyid,type));
 //        printf("%d\n",GET_SEQUENCE_BY_DONKEY_ID(donkeyid,type));
-//    }
-//    donkeyid_shutdown(1);
-    int sum = 10001;
-    __uint64_t *list = (__uint64_t *) malloc(sizeof(__uint64_t)*sum);
-    bzero(list,sizeof(__uint64_t)*sum);
-    if (donkeyid_get_id_by_time(list ,0,sum) != 0){
-        printf("error\n");
-        return -1;
     }
-    //printf("success %d\n",strlen(list));
-    int i=0;
-    for (i = 0; i < sum; ++i) {
-        printf("%llu\n",*(list+i));
-    }
+    donkeyid_shutdown(1);
 }

@@ -15,11 +15,13 @@
 typedef int zend_size_t;
 
 #define dk_add_next_index_stringl(a,s,l,d) add_next_index_stringl(a,s,l,d)
+#define dk_add_assoc_stringl_ex(a,ks,kl,s,l,d) add_assoc_stringl_ex(a,ks,kl,s,l,d)
 
 #else
 
 #define DK_RETURN_STRINGL(s,l,dup) RETURN_STRINGL(s,l)
 #define dk_add_next_index_stringl(a,s,l,d)  add_next_index_stringl(a,s,l)
+#define dk_add_assoc_stringl_ex(a,ks,kl,s,l,d) add_assoc_stringl_ex(a,ks,kl,s,l)
 
 static inline zval* dk_zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent){
     zval rv;
