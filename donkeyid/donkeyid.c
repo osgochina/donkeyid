@@ -277,14 +277,29 @@ PHP_FUNCTION(dk_get_next_id)
 {
     char buffer[64];
     int len;
-    dk_p_t pt = {
-            dtype: (int) DONKEYID_G(dk_type),
-            node_id:  DONKEYID_G(dk_node_id),
-            epoch: DONKEYID_G(dk_epoch),
-    };
-    uint64_t donkeyid = donkeyid_next_id(pt);
-    len = sprintf(buffer, "%"PRIu64, donkeyid);
-    DK_RETURN_STRINGL(buffer, len, 1);
+    long type = -1;
+    //获取类方法的参数
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "|l", &type) == FAILURE) {
+        RETURN_FALSE;
+    }
+    if (type < 0){
+        type = DONKEYID_G(dk_type);
+    }else if(type >= MAX_DONKEYID_TYPE){
+        type = 0;
+    }
+    if (type == 2){
+        len = donkeyid_type_2_next_id(DONKEYID_G(dk_node_id),buffer);
+        DK_RETURN_STRINGL(buffer, len, 1);
+    }else{
+        dk_p_t pt = {
+                dtype: (int) type,
+                node_id:  DONKEYID_G(dk_node_id),
+                epoch: DONKEYID_G(dk_epoch),
+        };
+        uint64_t donkeyid = donkeyid_next_id(pt);
+        len = sprintf(buffer, "%"PRIu64, donkeyid);
+        DK_RETURN_STRINGL(buffer, len, 1);
+    }
 }
 
 ZEND_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime) {
@@ -375,19 +390,25 @@ PHP_FUNCTION(dk_parse_id)
     zend_size_t val_len;
     char buffer[64];
     int len;
+    long type = -1;
     //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "ls", &type, &val, &val_len) == FAILURE) {
         return;
     }
     uint64_t id = strtoul(val, NULL, 10);
     if (id == 0) {
         RETURN_FALSE;
     }
+    if (type < 0){
+        type = DONKEYID_G(dk_type);
+    }else if(type >= MAX_DONKEYID_TYPE){
+        type = 0;
+    }
     array_init(return_value);
-    uint64_t time = GET_TIMESTAMP_BY_DONKEY_ID(id, DONKEYID_G(dk_type), DONKEYID_G(dk_epoch));
-    len = sprintf(buffer, "%"PRIu64, DONKEYID_G(dk_type) == 0 ? time : time * 1000);
-    int sequence = GET_SEQUENCE_BY_DONKEY_ID(id, DONKEYID_G(dk_type));
-    int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, DONKEYID_G(dk_type));
+    uint64_t time = GET_TIMESTAMP_BY_DONKEY_ID(id, type, DONKEYID_G(dk_epoch));
+    len = sprintf(buffer, "%"PRIu64, type == 0 ? time : time * 1000);
+    int sequence = GET_SEQUENCE_BY_DONKEY_ID(id, type);
+    int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, type);
 
     dk_add_assoc_stringl_ex(return_value,"time",5,buffer,(uint)len,1);
     add_assoc_long_ex(return_value,"node_id",8,nodeid);

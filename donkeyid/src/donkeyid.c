@@ -84,6 +84,11 @@ static void init_pid() {
 }
 
 
+static void get_date(char *s,size_t n){
+    time_t t = time(0);
+    strftime( s, n, "%Y%m%d%H%M%S",localtime(&t));
+}
+
 /**
  * 获取当前毫秒数
  */
@@ -182,7 +187,7 @@ uint64_t donkeyid_next_id(dk_p_t pt) {
                 (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
             }
             if (now == (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
-                (mlock+pt.dtype)->donkeyid_context.sequence = mlock->donkeyid_context.sequence + 1 & SEQUENCE_MASK;
+                (mlock+pt.dtype)->donkeyid_context.sequence = (mlock+pt.dtype)->donkeyid_context.sequence + 1 & SEQUENCE_MASK;
                 if ((mlock+pt.dtype)->donkeyid_context.sequence == 0) {
                     now = wait_next_ms();
                 }
@@ -202,6 +207,42 @@ uint64_t donkeyid_next_id(dk_p_t pt) {
     spin_unlock(&((mlock+pt.dtype)->lock), pid);
     return id;
 }
+
+int donkeyid_type_2_next_id(long node_id,char *buffer) {
+
+    //初始化pid
+    init_pid();
+    int len = 0;
+    uint32_t id =0;
+    spin_lock(&((mlock+2)->lock), pid);
+    uint64_t now = get_curr_timestamp_ms();
+    if (now == 0ULL) {
+        len = 0;
+        goto unlock_end;
+    }
+    if (now < (mlock+2)->donkeyid_context.last_timestamp) {
+        (mlock+2)->donkeyid_context.last_timestamp = now;
+    }
+    if (now == (mlock+2)->donkeyid_context.last_timestamp) {
+        (mlock+2)->donkeyid_context.sequence = (mlock+2)->donkeyid_context.sequence + 1 & TYPE_2_SEQUENCE_MASK;
+        if ((mlock+2)->donkeyid_context.sequence == 0) {
+            now = wait_next_ms();
+        }
+    } else {
+        //使得生成的id尾号均匀
+        srand((unsigned int)now);
+        (mlock+2)->donkeyid_context.sequence = rand() % 2;
+    }
+    (mlock+2)->donkeyid_context.last_timestamp = now;
+    char s[15];
+    get_date(s,15);
+    len = sprintf(buffer,"%s%.3d%.4d%.4d",s,(int)(now%1000),(int)(node_id & TYPE_2_NODE_ID_MASK),(mlock+2)->donkeyid_context.sequence);
+    unlock_end:
+    spin_unlock(&((mlock+2)->lock), pid);
+    return len;
+}
+
+
 
 /**
  * 批量获取1秒内的id
