@@ -263,14 +263,20 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId) {
     zval *ztype = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("type"), 0 TSRMLS_CC);
     zval *znode_id = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("node_id"), 0 TSRMLS_CC);
     zval *zepoch = dk_zend_read_property(donkeyid_ce, getThis(), ZEND_STRL("epoch"), 0 TSRMLS_CC);
-    dk_p_t pt = {
-            dtype:(int) Z_LVAL_P(ztype),
-            node_id: Z_LVAL_P(znode_id),
-            epoch: Z_LVAL_P(zepoch),
-    };
-    uint64_t donkeyid = donkeyid_next_id(pt);
-    len = sprintf(buffer, "%"PRIu64, donkeyid);
-    DK_RETURN_STRINGL(buffer, len, 1);
+
+    if (Z_LVAL_P(ztype) == 2){
+        len = donkeyid_type_2_next_id(DONKEYID_G(dk_node_id),buffer);
+        DK_RETURN_STRINGL(buffer, len, 1);
+    }else{
+        dk_p_t pt = {
+                dtype:(int) Z_LVAL_P(ztype),
+                node_id: Z_LVAL_P(znode_id),
+                epoch: Z_LVAL_P(zepoch),
+        };
+        uint64_t donkeyid = donkeyid_next_id(pt);
+        len = sprintf(buffer, "%"PRIu64, donkeyid);
+        DK_RETURN_STRINGL(buffer, len, 1);
+    }
 }
 
 PHP_FUNCTION(dk_get_next_id)

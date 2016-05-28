@@ -156,13 +156,15 @@ uint64_t donkeyid_next_id(dk_p_t pt) {
                 id =  0ULL;
                 goto unlock_end;
             }
+
             if (now < (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
                 (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
             }
             if (now == (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
-                (mlock+pt.dtype)->donkeyid_context.sequence = (mlock+pt.dtype)->donkeyid_context.sequence + 1 & TYPE_1_SEQUENCE_MASK;
-                if ((mlock+pt.dtype)->donkeyid_context.sequence == 0) {
+                (mlock+pt.dtype)->donkeyid_context.sequence = ((mlock+pt.dtype)->donkeyid_context.sequence + 1);
+                if ((mlock+pt.dtype)->donkeyid_context.sequence == TYPE_1_SEQUENCE_MASK) {
                     now = wait_next_stamp(now);
+                    (mlock+pt.dtype)->donkeyid_context.sequence = 0;
                 }
             } else {
                 //使得生成的id尾号均匀
@@ -187,7 +189,7 @@ uint64_t donkeyid_next_id(dk_p_t pt) {
                 (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
             }
             if (now == (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
-                (mlock+pt.dtype)->donkeyid_context.sequence = (mlock+pt.dtype)->donkeyid_context.sequence + 1 & SEQUENCE_MASK;
+                (mlock+pt.dtype)->donkeyid_context.sequence = ((mlock+pt.dtype)->donkeyid_context.sequence + 1) & SEQUENCE_MASK;
                 if ((mlock+pt.dtype)->donkeyid_context.sequence == 0) {
                     now = wait_next_ms();
                 }
