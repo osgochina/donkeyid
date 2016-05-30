@@ -34,7 +34,8 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 > 1. 默认模式,以上的介绍都是基于默认模式, new DonkeyId 的时候 $type=0或者不传参。
 > 2. 第二种模式是10进制模式 生成最多20位数字.从右开始算第十位以后的数字是时间戳的秒，
 >    第7位到第9位 是节点id。三位数字，最多到999.从第2位到第6位是秒内的自增id,
-     最后一位是留给业务方的自定义位数。
+>     最后一位是留给业务方的自定义位数。2016053010150316300120001
+> 3. 第三种模式是字符串模式，生成一个25位的字符串,前17位是年月日时分秒毫秒,第18位到21位是节点id，第22-25位是毫秒内自增id。
 
 ###运行
 #### 配置
@@ -59,8 +60,8 @@ donkeyid.epoch=0
 * string getNextId();
 * array parseId($id);  //返回解析后的数据，包括nodie,time,sequence
 * array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<1024000
-* dk_get_next_id(); //直接使用函数获取id,根据php.ini中的配置生成
-* dk_parse_id($id); //返回解析后的数据，包括nodie,time,sequence,跟类的解析区别，这里使用的配置是php.ini中的默认配置
+* dk_get_next_id([type]); //直接使用函数获取id,根据php.ini中的配置生成
+* dk_parse_id($id,[type]); //返回解析后的数据，包括nodie,time,sequence,跟类的解析区别，这里使用的配置是php.ini中的默认配置
 
 ####测试代码
 

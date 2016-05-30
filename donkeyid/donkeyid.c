@@ -370,6 +370,9 @@ PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseId) {
     if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s", &val, &val_len) == FAILURE) {
         return;
     }
+    if (val_len > 20){
+        RETURN_FALSE;
+    }
     uint64_t id = strtoul(val, NULL, 10);
     if (id == 0) {
         RETURN_FALSE;
@@ -398,8 +401,11 @@ PHP_FUNCTION(dk_parse_id)
     int len;
     long type = -1;
     //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "ls", &type, &val, &val_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "s|l", &val, &val_len,&type) == FAILURE) {
         return;
+    }
+    if (type > 2 || val_len > 20){
+        RETURN_FALSE;
     }
     uint64_t id = strtoul(val, NULL, 10);
     if (id == 0) {
