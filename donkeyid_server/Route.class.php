@@ -10,18 +10,6 @@
 class Route
 {
     public $error;
-    public $donkeyid0;
-    public $donkeyid1;
-
-    public function __construct(){
-        $epoch = getConfig("epoch");
-        $node_id = getConfig("node_id");
-        if($epoch <= 0){
-            $epoch = 0;
-        }
-        $this->donkeyid0 = new DonkeyId(0,$epoch,$node_id);
-        $this->donkeyid1 = new DonkeyId(1,$epoch,$node_id);
-    }
 
     public function run($request)
     {
@@ -39,39 +27,43 @@ class Route
         $type = isset($params[1])?$params[1]:0;
         switch(strtolower($params[0])){
             case "getnextid": {
-
-                if ( $type == 0) {
-                    $id = $this->donkeyid0->getNextId();
-                } elseif ($type == 1) {
-                    $id = $this->donkeyid1->getNextId();
-                }
-                return $this->success($id);
+                return $this->success(dk_get_next_id());
+            }
+            case "gettsid": {
+                return $this->success(dk_get_ts_id());
+            }
+            case "getdtid": {
+                return $this->success(dk_get_dt_id());
             }
             case "parseid":{
-                $id = $params[2];
+                $id = $params[1];
                 if(strlen($id) > 20 || !is_numeric($id)){
                     return $this->error("parameter error!");
                 }
-                if ($type == 0) {
-                    $d = $this->donkeyid0->parseId($id);
-                } elseif ($type == 1) {
-                    $d = $this->donkeyid1->parseId($id);
-                }
-                return $this->success($d);
+                return $this->success(dk_parse_id($id));
             }
-            case "getidbytime":{
-                if(!isset($params[2]) || !isset($params[3])){
+            case "parsetsid":{
+                $id = $params[1];
+                if(strlen($id) > 20 || !is_numeric($id)){
                     return $this->error("parameter error!");
                 }
-                $time = $params[2];
-                $num = $params[3];
-
-                if ( $type == 0) {
-                    $ids = $this->donkeyid0->getIdByTime($time,$num);
-                } elseif ($type == 1) {
-                    $ids = $this->donkeyid1->getIdByTime($time,$num);
+                return $this->success(dk_parse_ts_id($id));
+            }
+             case "getnextids":{
+                if(!isset($params[1]) || !isset($params[2])){
+                    return $this->error("parameter error!");
                 }
-                return $this->success($ids);
+                $time = $params[1];
+                $num = $params[2];
+                return $this->success(dk_get_next_ids($time,$num));
+            }
+            case "gettsids":{
+                if(!isset($params[1]) || !isset($params[2])){
+                    return $this->error("parameter error!");
+                }
+                $time = $params[1];
+                $num = $params[2];
+                return $this->success(dk_get_ts_ids($time,$num));
             }
           
         }

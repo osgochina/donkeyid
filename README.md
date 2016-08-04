@@ -1,4 +1,5 @@
 # DonkeyID---php扩展-64位自增ID生成器
+[0.7版本请访问](https://github.com/osgochina/donkeyid/tree/donkeyid-0.7)
 ##原理
 	参考Twitter-Snowflake 算法,扩展了其中的细节。具体组成如下图：
 	
@@ -29,13 +30,13 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 ```
 ### 模式介绍
 
-> DonkeyId 有两种id生成模式：
+> DonkeyId 有三种id生成模式：
 
-> 1. 默认模式,以上的介绍都是基于默认模式, new DonkeyId 的时候 $type=0或者不传参。
+> 1. 默认模式,以上的介绍都是基于默认模式, dk_get_next_id()。
 > 2. 第二种模式是10进制模式 生成最多20位数字.从右开始算第十位以后的数字是时间戳的秒，
 >    第7位到第9位 是节点id。三位数字，最多到999.从第2位到第6位是秒内的自增id,
->     最后一位是留给业务方的自定义位数。2016053010150316300120001
-> 3. 第三种模式是字符串模式，生成一个25位的字符串,前17位是年月日时分秒毫秒,第18位到21位是节点id，第22-25位是毫秒内自增id。
+>     最后一位是留给业务方的自定义位数。2016053010150316300120001.dk_get_ts_id().
+> 3. 第三种模式是字符串模式，生成一个25位的字符串,前17位是年月日时分秒毫秒,第18位到21位是节点id，第22-25位是毫秒内自增id。dk_get_dt_id().
 
 ###运行
 #### 配置
@@ -44,37 +45,50 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 
 ```
 [DonkeyId]
-;[0,1]
-donkeyid.type=0
 ;0-4095
 donkeyid.node_id=0
 ;0-当前时间戳
 donkeyid.epoch=0
 
 ```
-> 也可以运行时配置，这样会覆盖php.ini中的配置
 
 ####api接口
 
-* new DonkeyId($type=0,$nodeid=0,$epoch=0);//$type 类型 值有0,1 epoch 纪元开始时间戳 可以设置从此开始计算秒数,节点id
-* string getNextId();
-* array parseId($id);  //返回解析后的数据，包括nodie,time,sequence
-* array getIdByTime($time,$num); //传入时间戳,需要生成的id数量 生成指定时间内需要的id数量 $num<1024000
-* dk_get_next_id([type]); //直接使用函数获取id,根据php.ini中的配置生成
-* dk_parse_id($id,[type]); //返回解析后的数据，包括nodie,time,sequence,跟类的解析区别，这里使用的配置是php.ini中的默认配置
+* dk_get_next_id()
+> 获取基于Snowflake算法的id
+* dk_get_next_ids($time,$num)
+> 获取基于Snowflake算法的id列表.$time:需要生成指定时间的id,$num:生成id的数量
+* dk_parse_id($id)
+> 解析基于Snowflake算法的id元数据,返回值包括:time id生成时间，node_id 节点id，sequence 自增数
+* dk_get_ts_id()
+> 获取10进制的时间戳类型的id
+* dk_get_ts_ids($time,$num)
+> 获取10进制的时间戳类型的id列表,$time:需要生成指定时间的id,$num:生成id的数量
+* dk_parse_ts_id($tsid)
+> 解析10进制的时间戳类型的id元数据,返回值包括:time id生成时间，node_id 节点id，sequence 自增数
+* dk_get_dt_id()
+> 获取字符串类型的id，显式包含日期时间属性
 
 ####测试代码
 
 ```php
 
-    echo "1--id=".($id1 = dk_get_next_id())."\n";
-    print_r(dk_parse_id($id1));
-    echo "\n";
-    $donkey = new DonkeyId(1);
-    $id2 = $donkey->getNextId();
-    echo "2--id=".$id2."\n";
-    print_r($donkey->parseId($id2));
-    echo "\n";
+    $nextid =  dk_get_next_id();
+    echo "nextid:".$nextid."\n";
+    print_r(dk_parse_id($nextid));
+
+    $tsid =  dk_get_ts_id();
+    echo "tsid:".$tsid."\n";
+    print_r(dk_parse_ts_id($tsid));
+
+    $dtid = dk_get_dt_id();
+    echo "dtid:".$dtid."\n";
+
+    echo "nextids:\n";
+    print_r(dk_get_next_ids(1470298401,100));
+
+    echo "tsids:\n";
+    print_r(dk_get_ts_ids(1470298401,100));
    
 ```
 #### 支持版本
@@ -107,14 +121,15 @@ donkeyid.epoch=0
 ####api接口列表：
 
 ```
-http://127.0.0.1:9521/getNextid/0   //获取默认类型id
-http://127.0.0.1:9521/getNextid/1   //获取10进制相乘类型id
+http://127.0.0.1:9521/getNextid   //获取默认类型id
+http://127.0.0.1:9521/getTsid   //获取10进制相乘类型id
+http://127.0.0.1:9521/getDtid   //获取字符串类型的id，显式包含日期时间属性
 
-http://127.0.0.1:9521/getIdByTime/{$type}/{$time}/{$num}   //$type[0|1],$time 时间戳 ,$num 数量
-                                                           //批量生成指定时间，指定数量的id。
-                                                           //type=0 num需要小于512000 type=1 num需小于9999
-http://127.0.0.1:9521/parseId/0/$id //解析默认类型ID
-http://127.0.0.1:9521/parseId/1/$id //解析10进制相乘类型ID
+http://127.0.0.1:9521/getNextids/{$time}/{$num}   //$time 时间戳 ,$num 数量 num需要小于512000
+http://127.0.0.1:9521/getTsids/{$time}/{$num}   //$time 时间戳 ,$num 数量   num需小于9999
+
+http://127.0.0.1:9521/parseId/$id //解析默认类型ID
+http://127.0.0.1:9521/parseTsId/$id //解析10进制相乘类型ID
 解析的返回值有：
 {
 "code":0, //执行状态 0正常，其他失败

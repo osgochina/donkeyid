@@ -141,162 +141,161 @@ static uint64_t wait_next_stamp(uint64_t now) {
 /**
  * 获取唯一id
  */
-uint64_t donkeyid_next_id(dk_p_t pt) {
+uint64_t donkeyid_next_id(long node_id,time_t epoch) {
     //初始化pid
     init_pid();
-
     uint64_t id;
-    spin_lock(&((mlock+pt.dtype)->lock), pid);
-    //根据不同的类型，生成不同类型的id
-    switch (pt.dtype) {
-        //生成10进制基地的自增id
-        case 1: {
-            uint64_t now = get_curr_timestamp();
-            if (now == 0ULL) {
-                id =  0ULL;
-                goto unlock_end;
-            }
-
-            if (now < (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
-                (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
-            }
-            if (now == (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
-                (mlock+pt.dtype)->donkeyid_context.sequence = ((mlock+pt.dtype)->donkeyid_context.sequence + 1);
-                if ((mlock+pt.dtype)->donkeyid_context.sequence == TYPE_1_SEQUENCE_MASK) {
-                    now = wait_next_stamp(now);
-                    (mlock+pt.dtype)->donkeyid_context.sequence = 0;
-                }
-            } else {
-                //使得生成的id尾号均匀
-                srand((unsigned int)now);
-                (mlock+pt.dtype)->donkeyid_context.sequence = rand() % 10;
-            }
-            (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
-            id = ((uint64_t) (((now - (pt.epoch != 0?pt.epoch:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
-                 +((uint64_t)(pt.node_id) * TYPE_1_NODE_ID)
-                 +((uint64_t)(mlock+pt.dtype)->donkeyid_context.sequence * 10);
-            break;
-        }
-        //默认类型
-        case 0:
-        default: {
-            uint64_t now = get_curr_timestamp_ms();
-            if (now == 0ULL) {
-                id =  0ULL;
-                goto unlock_end;
-            }
-            if (now < (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
-                (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
-            }
-            if (now == (mlock+pt.dtype)->donkeyid_context.last_timestamp) {
-                (mlock+pt.dtype)->donkeyid_context.sequence = ((mlock+pt.dtype)->donkeyid_context.sequence + 1) & SEQUENCE_MASK;
-                if ((mlock+pt.dtype)->donkeyid_context.sequence == 0) {
-                    now = wait_next_ms();
-                }
-            } else {
-                //使得生成的id尾号均匀
-                srand((unsigned int)now);
-                (mlock+pt.dtype)->donkeyid_context.sequence = rand() % 2;
-            }
-            (mlock+pt.dtype)->donkeyid_context.last_timestamp = now;
-            id = ((uint64_t) ((now - pt.epoch*1000) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
-                 | ((uint64_t) (pt.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
-                 | ((uint64_t) (mlock+pt.dtype)->donkeyid_context.sequence);
-            break;
-        }
-    }
-    unlock_end:
-    spin_unlock(&((mlock+pt.dtype)->lock), pid);
-    return id;
-}
-
-int donkeyid_type_2_next_id(long node_id,char *buffer) {
-
-    //初始化pid
-    init_pid();
-    int len = 0;
-    uint32_t id =0;
-    spin_lock(&((mlock+2)->lock), pid);
+    spin_lock(&((mlock+NEXTTYPE)->lock), pid);
     uint64_t now = get_curr_timestamp_ms();
     if (now == 0ULL) {
-        len = 0;
+        id =  0ULL;
         goto unlock_end;
     }
-    if (now < (mlock+2)->donkeyid_context.last_timestamp) {
-        (mlock+2)->donkeyid_context.last_timestamp = now;
+    if (now < (mlock+NEXTTYPE)->donkeyid_context.last_timestamp) {
+        (mlock+NEXTTYPE)->donkeyid_context.last_timestamp = now;
     }
-    if (now == (mlock+2)->donkeyid_context.last_timestamp) {
-        (mlock+2)->donkeyid_context.sequence = (mlock+2)->donkeyid_context.sequence + 1 & TYPE_2_SEQUENCE_MASK;
-        if ((mlock+2)->donkeyid_context.sequence == 0) {
+    if (now == (mlock+NEXTTYPE)->donkeyid_context.last_timestamp) {
+        (mlock+NEXTTYPE)->donkeyid_context.sequence = ((mlock+NEXTTYPE)->donkeyid_context.sequence + 1) & SEQUENCE_MASK;
+        if ((mlock+NEXTTYPE)->donkeyid_context.sequence == 0) {
             now = wait_next_ms();
         }
     } else {
         //使得生成的id尾号均匀
         srand((unsigned int)now);
-        (mlock+2)->donkeyid_context.sequence = rand() % 2;
+        (mlock+NEXTTYPE)->donkeyid_context.sequence = rand() % 2;
     }
-    (mlock+2)->donkeyid_context.last_timestamp = now;
-    char s[15];
-    get_date(s,15);
-    len = sprintf(buffer,"%s%.3d%.4d%.4d",s,(int)(now%1000),(int)(node_id & TYPE_2_NODE_ID_MASK),(mlock+2)->donkeyid_context.sequence);
+    (mlock+NEXTTYPE)->donkeyid_context.last_timestamp = now;
+    id = ((uint64_t) ((now - epoch*1000) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+         | ((uint64_t) (node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
+         | ((uint64_t) (mlock+NEXTTYPE)->donkeyid_context.sequence);
     unlock_end:
-    spin_unlock(&((mlock+2)->lock), pid);
-    return len;
+    spin_unlock(&((mlock+NEXTTYPE)->lock), pid);
+    return id;
 }
 
+//生成10进制基地的自增id
+uint64_t donkeyid_ts_id(long node_id,time_t epoch)
+{
+    //初始化pid
+    init_pid();
 
+    uint64_t id;
+    spin_lock(&((mlock+TSTYPE)->lock), pid);
+    uint64_t now = get_curr_timestamp();
+    if (now == 0ULL) {
+        id =  0ULL;
+        goto unlock_end;
+    }
 
-/**
- * 批量获取1秒内的id
- */
-int donkeyid_get_id_by_time(uint64_t  *list,time_t time,int sum,dk_p_t pt)
+    if (now < (mlock+TSTYPE)->donkeyid_context.last_timestamp) {
+        (mlock+TSTYPE)->donkeyid_context.last_timestamp = now;
+    }
+    if (now == (mlock+TSTYPE)->donkeyid_context.last_timestamp) {
+        (mlock+TSTYPE)->donkeyid_context.sequence = ((mlock+TSTYPE)->donkeyid_context.sequence + 1);
+        if ((mlock+TSTYPE)->donkeyid_context.sequence == TYPE_1_SEQUENCE_MASK) {
+            now = wait_next_stamp(now);
+            (mlock+TSTYPE)->donkeyid_context.sequence = 0;
+        }
+    } else {
+        //使得生成的id尾号均匀
+        srand((unsigned int)now);
+        (mlock+TSTYPE)->donkeyid_context.sequence = rand() % 10;
+    }
+    (mlock+TSTYPE)->donkeyid_context.last_timestamp = now;
+    id = ((uint64_t) (((now - (epoch != 0?epoch:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
+         +((uint64_t)(node_id) * TYPE_1_NODE_ID)
+         +((uint64_t)(mlock+TSTYPE)->donkeyid_context.sequence * 10);
+    unlock_end:
+    spin_unlock(&((mlock+TSTYPE)->lock), pid);
+    return id;
+
+}
+//获取日期时间型字符串id
+int donkeyid_dt_id(long node_id,char *buffer) {
+
+    //初始化pid
+    init_pid();
+    int len = 0;
+    spin_lock(&((mlock+DTTYPE)->lock), pid);
+    uint64_t now = get_curr_timestamp_ms();
+    if (now == 0ULL) {
+        len = 0;
+        goto unlock_end;
+    }
+    if (now < (mlock+DTTYPE)->donkeyid_context.last_timestamp) {
+        (mlock+DTTYPE)->donkeyid_context.last_timestamp = now;
+    }
+    if (now == (mlock+DTTYPE)->donkeyid_context.last_timestamp) {
+        (mlock+DTTYPE)->donkeyid_context.sequence = (mlock+DTTYPE)->donkeyid_context.sequence + 1 & TYPE_2_SEQUENCE_MASK;
+        if ((mlock+DTTYPE)->donkeyid_context.sequence == 0) {
+            now = wait_next_ms();
+        }
+    } else {
+        //使得生成的id尾号均匀
+        srand((unsigned int)now);
+        (mlock+DTTYPE)->donkeyid_context.sequence = rand() % 2;
+    }
+    (mlock+DTTYPE)->donkeyid_context.last_timestamp = now;
+    char s[15];
+    get_date(s,15);
+    len = sprintf(buffer,"%s%.3d%.4d%.4d",s,(int)(now%1000),(int)(node_id & TYPE_2_NODE_ID_MASK),(mlock+DTTYPE)->donkeyid_context.sequence);
+    unlock_end:
+    spin_unlock(&((mlock+DTTYPE)->lock), pid);
+    return len;
+}
+//获取snowflake类型的id列表
+int donkeyid_get_next_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch)
 {
     //初始化pid
     init_pid();
 
     //时间不能小于0，不能小于起始纪元
-    if (time < 0 || (time*1000) < pt.epoch){
+    if (time < 0 || (time*1000) < epoch){
         return -1;
     }
 
     int msec,sequence;
     int n=0;
-    switch (pt.dtype) {
-        //生成10进制基地的自增id
-        case 1: {
-            //单次获取数量不能超过上限
-            if (sum > TYPE_1_SEQUENCE_MASK){
-                return -1;
-            }
-            int max_sequence = TYPE_1_SEQUENCE_MASK;
-            for (sequence = 0;sequence<max_sequence;sequence++){
-                if (n >= sum){ break;}
-                *(list+n) = ((uint64_t) ((((time)  - (pt.epoch != 0?pt.epoch:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
-                            +((uint64_t)(pt.node_id) * TYPE_1_NODE_ID)
-                            +((uint64_t)sequence * 10);
-                n++;
-            }
-            break;
+
+    //单次获取数量不能超过上限
+    if (sum >= MAX_BATCH_ID_LEN){
+        return -1;
+    }
+    int max_sequence = MAX_BATCH_ID_LEN/1000;
+    for (msec = 0; msec < 1000; msec++) {
+        for (sequence = 0;sequence<max_sequence;sequence++){
+            if (n >= sum){ break;}
+            *(list+n) = ((uint64_t) (((time*1000+msec) - epoch*1000) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
+                        | ((uint64_t) (node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
+                        | ((uint64_t) sequence);
+            n++;
         }
-        //默认类型
-        case 0:
-        default: {
-            //单次获取数量不能超过上限
-            if (sum >= MAX_BATCH_ID_LEN){
-                return -1;
-            }
-            int max_sequence = MAX_BATCH_ID_LEN/1000;
-            for (msec = 0; msec < 1000; msec++) {
-                for (sequence = 0;sequence<max_sequence;sequence++){
-                    if (n >= sum){ break;}
-                    *(list+n) = ((uint64_t) (((time*1000+msec) - pt.epoch*1000) & TIMESTAMP_MASK) << TIMESTAMP_LEFT_SHIFT)
-                                | ((uint64_t) (pt.node_id & NODE_ID_MASK) << NODE_ID_LEFT_SHIFT)
-                                | ((uint64_t) sequence);
-                    n++;
-                }
-            }
-            break;
-        }
+    }
+    return 0;
+}
+//生成10进制基地的自增id列表
+int donkeyid_get_ts_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch)
+{
+    //初始化pid
+    init_pid();
+    //时间不能小于0，不能小于起始纪元
+    if (time < 0 || (time*1000) < epoch){
+        return -1;
+    }
+    int sequence;
+    int n=0;
+
+    //单次获取数量不能超过上限
+    if (sum > TYPE_1_SEQUENCE_MASK){
+        return -1;
+    }
+    int max_sequence = TYPE_1_SEQUENCE_MASK;
+    for (sequence = 0;sequence<max_sequence;sequence++){
+        if (n >= sum){ break;}
+        *(list+n) = ((uint64_t) ((((time)  - (epoch != 0?epoch:0))) & TYPE_1_TIMESTAMP_MASK) * TYPE_1_TIMESTAMP)
+                    +((uint64_t)(node_id) * TYPE_1_NODE_ID)
+                    +((uint64_t)sequence * 10);
+        n++;
     }
     return 0;
 

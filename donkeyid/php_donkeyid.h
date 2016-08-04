@@ -25,7 +25,6 @@ extern zend_module_entry donkeyid_module_entry;
 #define phpext_donkeyid_ptr &donkeyid_module_entry
 
 #define PHP_DONKEYID_VERSION "0.2.0" /* Replace with version number for your extension */
-#define PHP_DONKEYID_CLASS_NAME "DonkeyId"
 
 #ifdef PHP_WIN32
 #	define PHP_DONKEYID_API __declspec(dllexport)
@@ -51,25 +50,22 @@ PHP_RSHUTDOWN_FUNCTION (donkeyid);
 
 PHP_MINFO_FUNCTION (donkeyid);
 
-PHP_FUNCTION(dk_get_next_id);
-PHP_FUNCTION(dk_parse_id);
+PHP_FUNCTION(dk_get_next_id);//获取基于Snowflake算法的id
+PHP_FUNCTION(dk_get_next_ids);//获取基于Snowflake算法的id列表
+PHP_FUNCTION(dk_parse_id);//解析基于Snowflake算法的id元数据
 
-//class method
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __construct);
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, __destruct);
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getNextId);
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, getIdByTime);
-PHP_METHOD (PHP_DONKEYID_CLASS_NAME, parseId);
+PHP_FUNCTION(dk_get_ts_id);//获取10进制的时间戳类型的id
+PHP_FUNCTION(dk_get_ts_ids);//获取10进制的时间戳类型的id列表
+PHP_FUNCTION(dk_parse_ts_id);//解析id元数据
 
-
+PHP_FUNCTION(dk_get_dt_id);//获取字符串类型的id，显式包含日期时间属性
 /* 
   	Declare any global variables you may need between the BEGIN
 	and END macros here:     
 */
 ZEND_BEGIN_MODULE_GLOBALS(donkeyid)
-	long  dk_type;
-	long  dk_node_id;
-	long  dk_epoch;
+	long  dk_node_id;//节点id
+	long  dk_epoch; //起始计算时间
 ZEND_END_MODULE_GLOBALS(donkeyid)
 
 

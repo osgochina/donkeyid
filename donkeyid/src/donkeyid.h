@@ -43,7 +43,6 @@
 #define TYPE_2_SEQUENCE_BITS 10
 #define TYPE_2_NODE_ID_MASK (-1^(-1<<TYPE_2_NODE_ID_BITS))
 #define TYPE_2_SEQUENCE_MASK (-1^(-1<<TYPE_2_SEQUENCE_BITS))
-#define TYPE_2_NODE_ID_LEFT_SHIFT (TYPE_2_SEQUENCE_BITS)
 
 #define GET_TIMESTAMP_BY_DONKEY_ID(id,type,epoch) (type==0)?((uint64_t)(id>>TIMESTAMP_LEFT_SHIFT)+(epoch*1000)):(uint64_t)((id+epoch*TYPE_1_TIMESTAMP)/TYPE_1_TIMESTAMP)
 #define GET_NODE_ID_BY_DONKEY_ID(id,type)  (type==0)?(int)((id>>NODE_ID_LEFT_SHIFT)&NODE_ID_MASK):(int)((id-((id/TYPE_1_TIMESTAMP)*TYPE_1_TIMESTAMP))/TYPE_1_NODE_ID)
@@ -57,12 +56,9 @@ typedef struct {
     int sequence;               //单服务器毫秒内的自增值
 } donkeyid_context_t;
 
-//参数结构体
-typedef struct {
-    int dtype;
-    long node_id;
-    time_t epoch;
-} dk_p_t;
+#define NEXTTYPE 0
+#define TSTYPE 1
+#define DTTYPE 2
 
 //批量获取id时最大能够获取的数量
 #define MAX_BATCH_ID_LEN ((1<<NODE_ID_LEFT_SHIFT)*1000)
@@ -74,9 +70,11 @@ void donkeyid_shutdown();
 
 uint64_t get_curr_timestamp();
 
-uint64_t donkeyid_next_id(dk_p_t);
+uint64_t donkeyid_next_id(long node_id,time_t epoch);
+uint64_t donkeyid_ts_id(long node_id,time_t epoch);
+int donkeyid_dt_id(long node_id,char *c);
+int donkeyid_get_next_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch);
+int donkeyid_get_ts_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch);
 
-int donkeyid_get_id_by_time(uint64_t  *,time_t,int,dk_p_t);//批量获取1秒内的id
-int donkeyid_type_2_next_id(long node_id,char *c);
 
 #endif //DONKEYID_DONKEYID_H

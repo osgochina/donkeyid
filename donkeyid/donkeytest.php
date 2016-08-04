@@ -1,26 +1,19 @@
 <?php
-/**
-    echo "1--id=".($id1 = dk_get_next_id(2))."\n";
-    //print_r(dk_parse_id(0,$id1));
-    //echo "\n";
 
-    $donkey = new DonkeyId(2);
-    $id2 = $donkey->getNextId();
+$nextid =  dk_get_next_id();
+echo "nextid:".$nextid."\n";
+print_r(dk_parse_id($nextid));
 
-**/
-    //echo "2--id=".$id2."\n";
-    //print_r($donkey->parseId($id2));
-    //echo "\n";
+$tsid =  dk_get_ts_id();
+echo "tsid:".$tsid."\n";
+print_r(dk_parse_ts_id($tsid));
 
-   // $array = $donkey->getIdByTime(1,10000);
-   // print_r($array);
+$dtid = dk_get_dt_id();
+echo "dtid:".$dtid."\n";
 
-    for($i=0;$i<1;$i++){
-    //$id2 = $donkey->getNextId();
-        $id1 = dk_get_next_id(2);
-        //print_r(dk_parse_id($id1));
-        echo $id1,"\n";
-    }
-    //print_r($id1);
+echo "nextids:\n";
+print_r(dk_get_next_ids(1470298401,100));
 
+echo "tsids:\n";
+print_r(dk_get_ts_ids(1470298401,100));
 
