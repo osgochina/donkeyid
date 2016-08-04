@@ -3,7 +3,7 @@
 ##原理
 	参考Twitter-Snowflake 算法,扩展了其中的细节。具体组成如下图：
 	
-![bits.jpg](https://github.com/osgochina/donkeyid/blob/master/doc/bits.jpg?raw=true)
+![bits.jpg](https://github.com/osgochina/donkeyid/blob/master/doc/bits.png?raw=true)
 
 > 如图所示，64bits 咱们分成了4个部分。
 
