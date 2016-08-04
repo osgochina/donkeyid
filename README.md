@@ -55,18 +55,31 @@ donkeyid.epoch=0
 ####api接口
 
 * dk_get_next_id()
+
 > 获取基于Snowflake算法的id
+
 * dk_get_next_ids($time,$num)
+
 > 获取基于Snowflake算法的id列表.$time:需要生成指定时间的id,$num:生成id的数量
+
 * dk_parse_id($id)
+
 > 解析基于Snowflake算法的id元数据,返回值包括:time id生成时间，node_id 节点id，sequence 自增数
+
 * dk_get_ts_id()
+
 > 获取10进制的时间戳类型的id
+
 * dk_get_ts_ids($time,$num)
+
 > 获取10进制的时间戳类型的id列表,$time:需要生成指定时间的id,$num:生成id的数量
+
 * dk_parse_ts_id($tsid)
+
 > 解析10进制的时间戳类型的id元数据,返回值包括:time id生成时间，node_id 节点id，sequence 自增数
+
 * dk_get_dt_id()
+
 > 获取字符串类型的id，显式包含日期时间属性
 
 ####测试代码
