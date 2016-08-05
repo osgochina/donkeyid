@@ -22,7 +22,11 @@
 > 下载代码到本地，进入项目文件夹，执行
 
 ```Bash
-cd ./donkeyid && /path/to/phpize &&  ./configure && make && make install
+cd ./donkeyid
+/path/to/phpize
+./configure --with-php-config=/path/to/php-config
+make
+make install
 ```
 
 ```Bssh
