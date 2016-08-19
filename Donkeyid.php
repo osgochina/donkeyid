@@ -9,9 +9,12 @@
  */
 class Donkeyid
 {
+    static $donkeyid;
+
     private $node_id;
     private $epoch;
     private $table;
+    private $lock;
 
     const snowflake = 0;
 
@@ -36,6 +39,14 @@ class Donkeyid
         $this->create_table();
     }
 
+    static function getInstance()
+    {
+        if (!self::$donkeyid)
+        {
+            self::$donkeyid = new Donkeyid();
+        }
+        return self::$donkeyid;
+    }
     /**
      * 创建共享内存
      */
@@ -45,6 +56,8 @@ class Donkeyid
         $this->table->column("last_timestamp",swoole_table::TYPE_INT, 8);
         $this->table->column("sequence",swoole_table::TYPE_INT, 4);
         $this->table->create();
+
+        $this->lock =  new swoole_lock(SWOOLE_SPINLOCK);
     }
 
     /**
@@ -73,7 +86,7 @@ class Donkeyid
     public function dk_get_next_id()
     {
         $now = $this->get_curr_timestamp_ms();
-        $this->table->lock();
+        $this->lock->lock();
         $col = $this->table->get(self::snowflake);
         if ($col == false || $col["last_timestamp"] > $now){
             $last_timestamp = $now;
@@ -93,7 +106,7 @@ class Donkeyid
             |(($this->node_id&(-1^(-1<<self::NODE_ID_BITS)))<<self::NODE_ID_LEFT_SHIFT)
             |($sequence);
 
-        $this->table->unlock();
+        $this->lock->unlock();
         return $id;
     }
 
