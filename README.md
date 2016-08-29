@@ -62,9 +62,9 @@ donkeyid.epoch=0
 
 > 获取基于Snowflake算法的id
 
-* dk_get_next_ids($time,$num)
+* dk_get_next_ids($num,$time=0)
 
-> 获取基于Snowflake算法的id列表.$time:需要生成指定时间的id,$num:生成id的数量
+> 获取基于Snowflake算法的id列表.$num:生成id的数量,$time:需要生成指定时间的id.$time 默认为0 生成当前时间指定数量的id
 
 * dk_parse_id($id)
 
@@ -74,9 +74,9 @@ donkeyid.epoch=0
 
 > 获取10进制的时间戳类型的id
 
-* dk_get_ts_ids($time,$num)
+* dk_get_ts_ids($num,$time=0)
 
-> 获取10进制的时间戳类型的id列表,$time:需要生成指定时间的id,$num:生成id的数量
+> 获取10进制的时间戳类型的id列表.$num:生成id的数量,$time:需要生成指定时间的id.$time 默认为0 生成当前时间指定数量的id
 
 * dk_parse_ts_id($tsid)
 
@@ -93,19 +93,23 @@ donkeyid.epoch=0
     $nextid =  dk_get_next_id();
     echo "nextid:".$nextid."\n";
     print_r(dk_parse_id($nextid));
-
+    
     $tsid =  dk_get_ts_id();
     echo "tsid:".$tsid."\n";
     print_r(dk_parse_ts_id($tsid));
-
+    
     $dtid = dk_get_dt_id();
     echo "dtid:".$dtid."\n";
-
+    
     echo "nextids:\n";
-    print_r(dk_get_next_ids(1470298401,100));
-
+    print_r(dk_get_next_ids(100,1470298401));
+    echo "nextids2:\n";
+    print_r(dk_get_next_ids(100));
+    
     echo "tsids:\n";
-    print_r(dk_get_ts_ids(1470298401,100));
+    print_r(dk_get_ts_ids(100,1470298401));
+    echo "tsids2:\n";
+    print_r(dk_get_ts_ids(100));
    
 ```
 #### 支持版本
@@ -142,8 +146,8 @@ http://127.0.0.1:9521/getNextid   //获取默认类型id
 http://127.0.0.1:9521/getTsid   //获取10进制相乘类型id
 http://127.0.0.1:9521/getDtid   //获取字符串类型的id，显式包含日期时间属性
 
-http://127.0.0.1:9521/getNextids/{$time}/{$num}   //$time 时间戳 ,$num 数量 num需要小于512000
-http://127.0.0.1:9521/getTsids/{$time}/{$num}   //$time 时间戳 ,$num 数量   num需小于9999
+http://127.0.0.1:9521/getNextids/{$num}/{$time}   //$time 时间戳 ,$num 数量 num需要小于512000
+http://127.0.0.1:9521/getTsids/{$num}/{$time}   //$time 时间戳 ,$num 数量   num需小于9999
 
 http://127.0.0.1:9521/parseId/$id //解析默认类型ID
 http://127.0.0.1:9521/parseTsId/$id //解析10进制相乘类型ID

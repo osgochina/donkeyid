@@ -50,20 +50,22 @@ class Route
                 return $this->success(dk_parse_ts_id($id));
             }
              case "getnextids":{
-                if(!isset($params[1]) || !isset($params[2])){
+                if(!isset($params[1])){
                     return $this->error("parameter error!");
                 }
-                $time = $params[1];
-                $num = $params[2];
-                return $this->success(dk_get_next_ids($time,$num));
+                if(!isset($params[2])) $params[2] =0;
+                $num = $params[1];
+                $time = $params[2];
+                return $this->success(dk_get_next_ids($num,$time));
             }
             case "gettsids":{
-                if(!isset($params[1]) || !isset($params[2])){
-                    return $this->error("parameter error!");
+                if(!isset($params[1])){
+                   return $this->error("parameter error!");
                 }
-                $time = $params[1];
-                $num = $params[2];
-                return $this->success(dk_get_ts_ids($time,$num));
+                if(!isset($params[2])) $params[2] =0;
+                $num = $params[1];
+                $time = $params[2];
+                return $this->success(dk_get_ts_ids($num,$time));
             }
           
         }

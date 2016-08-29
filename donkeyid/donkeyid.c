@@ -23,13 +23,10 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_donkeyid.h"
 #include "src/donkeyid.h"
 #include "php_wrapper.h"
-#include <inttypes.h>
-#include <main/SAPI.h>
 
 
 /* If you declare any globals in php_donkeyid.h uncomment this:
@@ -58,8 +55,8 @@ PHP_INI_END()
 /* }}} */
 //类方法参数定义
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_getIdByTime, 0, 0, 0)
-                ZEND_ARG_INFO(0, time)
                 ZEND_ARG_INFO(0, num)
+                ZEND_ARG_INFO(0, time)
 ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseId, 0, 0, 0)
                 ZEND_ARG_INFO(0, id)
@@ -227,18 +224,14 @@ PHP_FUNCTION(dk_get_dt_id)
 PHP_FUNCTION(dk_get_next_ids)
 {
     char buffer[64];
-    int len;
-    char *val = NULL;
+    uint len;
+    char *val = 0;
     zend_size_t val_len;
     long num;
     int n;
     //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "sl", &val, &val_len,&num) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "l|s",&num, &val, &val_len) == FAILURE) {
         return;
-    }
-    uint64_t time = strtoul(val, NULL, 10);
-    if (time == 0) {
-        RETURN_FALSE;
     }
     if(num >= MAX_BATCH_ID_LEN){
         num = MAX_BATCH_ID_LEN;
@@ -246,14 +239,25 @@ PHP_FUNCTION(dk_get_next_ids)
         num = 1;
     }
     uint64_t *idlist = (uint64_t *)malloc(sizeof(uint64_t)*num);
+
     long node_id =  DONKEYID_G(dk_node_id);
     time_t epoch = DONKEYID_G(dk_epoch);
-    if (donkeyid_get_next_ids(idlist,time,num,node_id,epoch) != 0){
-        RETURN_FALSE;
+    if (val == 0) {
+        for (n = 0; n < num ; n++) {
+            *(idlist+n) = donkeyid_next_id(node_id,epoch);
+        }
+    } else{
+        uint64_t time = strtoul(val, NULL, 10);
+        if (time == 0){
+            RETURN_FALSE;
+        }
+        if (donkeyid_get_next_ids(idlist,time,num,node_id,epoch) != 0){
+            RETURN_FALSE;
+        }
     }
     array_init(return_value);
     for (n = 0; n < num ; n++) {
-        len = sprintf(buffer, "%"PRIu64, *(idlist+n));
+        len = (uint)sprintf(buffer, "%"PRIu64, *(idlist+n));
         dk_add_next_index_stringl(return_value,buffer,len,1);
     }
     free(idlist);
@@ -262,18 +266,14 @@ PHP_FUNCTION(dk_get_next_ids)
 PHP_FUNCTION(dk_get_ts_ids)
 {
     char buffer[64];
-    int len;
+    uint len;
     char *val = NULL;
     zend_size_t val_len;
     long num;
     int n;
     //获取类方法的参数
-    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "sl", &val, &val_len,&num) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "l|s",&num, &val, &val_len) == FAILURE) {
         return;
-    }
-    uint64_t time = strtoul(val, NULL, 10);
-    if (time == 0) {
-        RETURN_FALSE;
     }
     if(num >= TYPE_1_SEQUENCE_MASK){
         num = TYPE_1_SEQUENCE_MASK;
@@ -283,12 +283,24 @@ PHP_FUNCTION(dk_get_ts_ids)
     uint64_t *idlist = (uint64_t *)malloc(sizeof(uint64_t)*num);
     long node_id =  DONKEYID_G(dk_node_id);
     time_t epoch = DONKEYID_G(dk_epoch);
-    if (donkeyid_get_ts_ids(idlist,time,num,node_id,epoch) != 0){
-        RETURN_FALSE;
+
+
+    if (val == 0) {
+        for (n = 0; n < num ; n++) {
+            *(idlist+n) = donkeyid_ts_id(node_id,epoch);
+        }
+    } else{
+        uint64_t time = strtoul(val, NULL, 10);
+        if (time == 0){
+            RETURN_FALSE;
+        }
+        if (donkeyid_get_ts_ids(idlist,time,num,node_id,epoch) != 0){
+            RETURN_FALSE;
+        }
     }
     array_init(return_value);
     for (n = 0; n < num ; n++) {
-        len = sprintf(buffer, "%"PRIu64, *(idlist+n));
+        len = (uint)sprintf(buffer, "%"PRIu64, *(idlist+n));
         dk_add_next_index_stringl(return_value,buffer,len,1);
     }
     free(idlist);

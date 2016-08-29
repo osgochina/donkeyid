@@ -12,8 +12,12 @@ $dtid = dk_get_dt_id();
 echo "dtid:".$dtid."\n";
 
 echo "nextids:\n";
-print_r(dk_get_next_ids(1470298401,100));
+print_r(dk_get_next_ids(100,1470298401));
+echo "nextids2:\n";
+print_r(dk_get_next_ids(100));
 
 echo "tsids:\n";
-print_r(dk_get_ts_ids(1470298401,100));
+print_r(dk_get_ts_ids(100,1470298401));
+echo "tsids2:\n";
+print_r(dk_get_ts_ids(100));
 

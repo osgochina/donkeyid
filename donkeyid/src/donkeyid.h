@@ -36,7 +36,6 @@
 #define TYPE_1_TIMESTAMP 100000000
 #define TYPE_1_NODE_ID 100000
 #define TYPE_1_TIMESTAMP_MASK 0xFFFFFFFF
-#define TYPE_1_NODE_ID_MASK 0x3e7
 #define TYPE_1_SEQUENCE_MASK 0x270f
 
 #define TYPE_2_NODE_ID_BITS 12
@@ -73,8 +72,8 @@ uint64_t get_curr_timestamp();
 uint64_t donkeyid_next_id(long node_id,time_t epoch);
 uint64_t donkeyid_ts_id(long node_id,time_t epoch);
 int donkeyid_dt_id(long node_id,char *c);
-int donkeyid_get_next_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch);
-int donkeyid_get_ts_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch);
+int donkeyid_get_next_ids(uint64_t  *list,time_t time,long sum,long node_id,time_t epoch);
+int donkeyid_get_ts_ids(uint64_t  *list,time_t time,long sum,long node_id,time_t epoch);
 
 
 #endif //DONKEYID_DONKEYID_H

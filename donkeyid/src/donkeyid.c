@@ -244,7 +244,7 @@ int donkeyid_dt_id(long node_id,char *buffer) {
     return len;
 }
 //获取snowflake类型的id列表
-int donkeyid_get_next_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch)
+int donkeyid_get_next_ids(uint64_t  *list,time_t time,long sum,long node_id,time_t epoch)
 {
     //初始化pid
     init_pid();
@@ -274,7 +274,7 @@ int donkeyid_get_next_ids(uint64_t  *list,time_t time,int sum,long node_id,time_
     return 0;
 }
 //生成10进制基地的自增id列表
-int donkeyid_get_ts_ids(uint64_t  *list,time_t time,int sum,long node_id,time_t epoch)
+int donkeyid_get_ts_ids(uint64_t  *list,time_t time,long sum,long node_id,time_t epoch)
 {
     //初始化pid
     init_pid();
