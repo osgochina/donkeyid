@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-#include <malloc.h>
+#include <sys/malloc.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <string.h>
