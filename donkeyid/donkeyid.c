@@ -49,8 +49,8 @@ PHP_INI_END()
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("donkeyid.node_id", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_node_id,zend_donkeyid_globals,donkeyid_globals)
-    STD_PHP_INI_ENTRY("donkeyid.epoch", "0", PHP_INI_SYSTEM, OnUpdateLong,dk_epoch,zend_donkeyid_globals,donkeyid_globals)
+    STD_PHP_INI_ENTRY("donkeyid.node_id", "0", PHP_INI_ALL, OnUpdateLong,dk_node_id,zend_donkeyid_globals,donkeyid_globals)
+    STD_PHP_INI_ENTRY("donkeyid.epoch", "0", PHP_INI_ALL, OnUpdateLong,dk_epoch,zend_donkeyid_globals,donkeyid_globals)
 PHP_INI_END()
 /* }}} */
 //类方法参数定义
