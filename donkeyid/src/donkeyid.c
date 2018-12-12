@@ -17,6 +17,7 @@
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <string.h>
@@ -25,6 +26,7 @@
 #include "donkeyid.h"
 #include "shm.h"
 #include "spinlock.h"
+
 
 
 int ncpu;
