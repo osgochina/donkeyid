@@ -16,6 +16,8 @@
 > 100%唯一性保证,根据nodeid的不一样保证多服务器的唯一性，使用共享内存+自旋锁保证单节点多进程的唯一性
 > 同一毫秒内自增变量保证并发的唯一性。
 
+
+
 ##使用
 ###安装
 
@@ -42,7 +44,10 @@ echo "extension=donkeyid.so" >> /path/to/php.ini
 >     最后一位是留给业务方的自定义位数。2016053010150316300120001.dk_get_ts_id().
 > 3. 第三种模式是字符串模式，生成一个25位的字符串,前17位是年月日时分秒毫秒,第18位到21位是节点id，第22-25位是毫秒内自增id,(mysql字段请使用varchar(25))。dk_get_dt_id().
 
-###运行
+### 运行
+
+* 注意，该扩展不支持php的线程安全模式,请在非线程安全模式下使用。
+
 #### 配置
 
 > 在php.ini 中配置节点id
@@ -113,51 +118,4 @@ donkeyid.epoch=0
    
 ```
 #### 支持版本
-> 支持 php5.3+ ,支持php 7
-
-# 基于swoole的id生成器server
-
-提供http的api接口，方便部署多台机器。
-###部署启动
-> donkeyid_server 有以下启动方式：
-
-```
-    帮助信息:
-    Usage: /path/to/php main.php [options] -- [args...]
-    --help             显示帮助信息
-    -h  [--host]       ip地址,默认监听127.0.0.1
-    -p  [--port]       端口,默认9521
-    -pd [--pid]        指定pid文件位置(默认pid文件保存在当前目录)
-    -l  [--log]        log文件夹的位置
-    -s  start          启动进程
-    -s  stop           停止进程
-    -d  [--daemon]     是否后台运行
-```
-
-###http接口
-
-> 启动server以后通过url访问：
-> http://127.0.0.1:9521/getNextid 就能获取到id.
-
-####api接口列表：
-
-```
-http://127.0.0.1:9521/getNextid   //获取默认类型id
-http://127.0.0.1:9521/getTsid   //获取10进制相乘类型id
-http://127.0.0.1:9521/getDtid   //获取字符串类型的id，显式包含日期时间属性
-
-http://127.0.0.1:9521/getNextids/{$num}/{$time}   //$time 时间戳 ,$num 数量 num需要小于512000
-http://127.0.0.1:9521/getTsids/{$num}/{$time}   //$time 时间戳 ,$num 数量   num需小于9999
-
-http://127.0.0.1:9521/parseId/$id //解析默认类型ID
-http://127.0.0.1:9521/parseTsId/$id //解析10进制相乘类型ID
-解析的返回值有：
-{
-"code":0, //执行状态 0正常，其他失败
-"data":{
-        "time":"1461674906404", //时间戳
-        "node_id":1,            //节点id
-        "sequence":0            //自增值
-        }
-}
-```
+> 支持 php5.3+ ,支持php 7 - 7.4
