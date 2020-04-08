@@ -1,6 +1,6 @@
 # DonkeyID---php扩展-64位自增ID生成器
 [0.7版本请访问](https://github.com/osgochina/donkeyid/tree/donkeyid-0.7)
-##原理
+## 原理
 	参考Twitter-Snowflake 算法,扩展了其中的细节。具体组成如下图：
 	
 ![bits.jpg](https://github.com/osgochina/donkeyid/blob/master/doc/bits.png?raw=true)
@@ -12,14 +12,14 @@
 > 4. ~~进程workerid，占位5bit，能够生成32个进程id。根据pid运算获得。(已经取消)~~
 > 4. 进程内毫秒时间自增序号。占位10bit,一毫秒能产生1024个id。也就是说并发1秒能产生1024000个id。
 
-###唯一性保证
+### 唯一性保证
 > 100%唯一性保证,根据nodeid的不一样保证多服务器的唯一性，使用共享内存+自旋锁保证单节点多进程的唯一性
 > 同一毫秒内自增变量保证并发的唯一性。
 
 
 
-##使用
-###安装
+## 使用
+### 安装
 
 > 下载代码到本地，进入项目文件夹，执行
 
@@ -61,7 +61,7 @@ donkeyid.epoch=0
 
 ```
 
-####api接口
+#### api接口
 
 * dk_get_next_id()
 
@@ -91,7 +91,7 @@ donkeyid.epoch=0
 
 > 获取字符串类型的id，显式包含日期时间属性
 
-####测试代码
+#### 测试代码
 
 ```php
 
