@@ -33,7 +33,7 @@ shm_free(struct shm *shm) {
 int
 shm_alloc(struct shm *shm)
 {
-    ngx_fd_t  fd;
+    int  fd;
 
     fd = open("/dev/zero", O_RDWR);
     if (fd == -1) {
