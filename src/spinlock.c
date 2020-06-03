@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include "spinlock.h"
+#include <sched.h>
 
 extern int ncpu;
 
