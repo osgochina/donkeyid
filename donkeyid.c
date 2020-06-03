@@ -328,9 +328,9 @@ PHP_FUNCTION(dk_parse_ts_id)
     int sequence = GET_SEQUENCE_BY_DONKEY_ID(id, TSTYPE);
     int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, TSTYPE);
 
-    dk_add_assoc_stringl_ex(return_value,"time",5,buffer,(uint)len,1);
-    add_assoc_long_ex(return_value,"node_id",8,nodeid);
-    add_assoc_long_ex(return_value,"sequence",9,sequence);
+    dk_add_assoc_stringl_ex(return_value,"time",4,buffer,(uint)len,1);
+    add_assoc_long_ex(return_value,"node_id",7,nodeid);
+    add_assoc_long_ex(return_value,"sequence",8,sequence);
 }
 
 PHP_FUNCTION(dk_parse_id)
@@ -356,9 +356,9 @@ PHP_FUNCTION(dk_parse_id)
     int sequence = GET_SEQUENCE_BY_DONKEY_ID(id, NEXTTYPE);
     int nodeid = GET_NODE_ID_BY_DONKEY_ID(id, NEXTTYPE);
 
-    dk_add_assoc_stringl_ex(return_value,"time",5,buffer,(uint)len,1);
-    add_assoc_long_ex(return_value,"node_id",8,nodeid);
-    add_assoc_long_ex(return_value,"sequence",9,sequence);
+    dk_add_assoc_stringl_ex(return_value,"time",4,buffer,(uint)len,1);
+    add_assoc_long_ex(return_value,"node_id",7,nodeid);
+    add_assoc_long_ex(return_value,"sequence",8,sequence);
 
 }
 
