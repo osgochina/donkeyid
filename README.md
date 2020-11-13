@@ -119,3 +119,4 @@ donkeyid.epoch=0
 ```
 #### 支持版本
 > 支持 php5.3+ ,支持php 7 - 7.4
+> 支持php 8
