@@ -62,6 +62,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_donkeyid_parseId, 0, 0, 0)
                 ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_void, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 /* Remove the following function when you have successfully modified config.m4
    so that your module can be compiled into PHP, it exists only for testing
    purposes. */
@@ -70,13 +73,13 @@ ZEND_END_ARG_INFO()
  * Every user visible function must have an entry in donkeyid_functions[].
  */
 const zend_function_entry donkeyid_methods[] = {
-        PHP_FE(dk_get_next_id, NULL)
+        PHP_FE(dk_get_next_id, arginfo_void)
         PHP_FE(dk_get_next_ids, arginfo_donkeyid_getIdByTime)
         PHP_FE(dk_parse_id, arginfo_donkeyid_parseId)
-        PHP_FE(dk_get_ts_id, NULL)
+        PHP_FE(dk_get_ts_id, arginfo_void)
         PHP_FE(dk_get_ts_ids, arginfo_donkeyid_getIdByTime)
         PHP_FE(dk_parse_ts_id, arginfo_donkeyid_parseId)
-        PHP_FE(dk_get_dt_id, NULL)
+        PHP_FE(dk_get_dt_id, arginfo_void)
         PHP_FE_END    /* Must be the last line in donkeyid_functions[] */
 };
 /* }}} */
